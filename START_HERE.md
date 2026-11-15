@@ -8,7 +8,7 @@
 - Portfolio MCP installation: https://github.com/griraj/GigBid/tree/main/mcp_servers/portfolio
 
 Enter your reviewer token privately in the app. It is deliberately absent from
-this archive. Keep it out of the recording and use only the private Classroom
+this submission folder. Keep it out of the recording and use only the private Classroom
 comment to share it with the instructor.
 
 ## Record your own three-minute video
@@ -31,10 +31,10 @@ comment to share it with the instructor.
 
 Use OBS, Windows screen recording, or another recorder. Upload the resulting
 video, check access while signed out, and add that URL to your final submission.
-`deliverables/GigBid_3min_Demo.webm` is an earlier scripted reference recording;
+`docs/demo/GigBid_Reference_Demo.webm` is an earlier scripted reference recording;
 record your own latest demonstration instead of presenting it as a new capture.
 
-## Run the extracted source locally
+## Run this project locally
 
 Requirements: Python 3.11+ (deployment targets 3.12), Node 20+.
 
@@ -57,12 +57,20 @@ This development token does not grant access to the public deployment.
 The default synthetic template/lexical demo runs without downloading models.
 See README.md for real Ollama generation/embeddings and evaluation instructions.
 
-## What the archive contains
+## Submission files in this folder
 
-The source is directly inside the GigBid folder, alongside `deliverables/` with
-the report, reference video, article and checklist. Tests and actual result
-files are included. Environments, dependency folders, runtime databases and
-private credentials are excluded.
+- `docs/GigBid_RnD_Report.pdf`: current ten-page R&D report.
+- `docs/TECHNICAL_WRITEUP.md`: source of the published technical article.
+- `docs/SUBMISSION_CHECKLIST.md`: the final links and upload checklist.
+- `docs/test-reports/playwright/index.html`: readable browser test report.
+- `evals/results/`: recorded test, retrieval, model and performance evidence.
+- `docs/demo/GigBid_Reference_Demo.webm`: earlier scripted reference video.
+- `submission.json`: verified public links and the pending final demo URL.
+
+Runnable source, configuration and tests stay in their existing assignment
+folders. Git history is preserved. Installed dependencies, runtime databases,
+temporary outputs, obsolete drafts and ZIP archives have been removed.
+Reinstall local dependencies using the commands above before running locally.
 
 The actual GigSim service/dev labels, policy update, external OAuth authorizations
 and independent outcome studies are unavailable. Additional production gaps are

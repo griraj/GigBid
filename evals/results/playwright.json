@@ -3,7 +3,8 @@
     "argv": [
       "C:\\Program Files\\nodejs\\node.exe",
       "C:\\Users\\mohit\\Downloads\\GigBid\\apps\\web\\node_modules\\@playwright\\test\\cli.js",
-      "test"
+      "test",
+      "--list"
     ],
     "configFile": "C:\\Users\\mohit\\Downloads\\GigBid\\apps\\web\\playwright.config.ts",
     "rootDir": "C:/Users/mohit/Downloads/GigBid/apps/web/tests/e2e",
@@ -16,18 +17,14 @@
     "grep": {},
     "grepInvert": null,
     "maxFailures": 0,
-    "metadata": {
-      "actualWorkers": 1
-    },
+    "metadata": {},
     "preserveOutput": "always",
     "projects": [
       {
-        "outputDir": "C:/Users/mohit/Downloads/GigBid/apps/web/test-results",
+        "outputDir": "C:/Users/mohit/Downloads/GigBid/tmp/playwright-results",
         "repeatEach": 1,
         "retries": 0,
-        "metadata": {
-          "actualWorkers": 1
-        },
+        "metadata": {},
         "id": "",
         "name": "",
         "testDir": "C:/Users/mohit/Downloads/GigBid/apps/web/tests/e2e",
@@ -42,12 +39,10 @@
       {
         "grep": {},
         "grepInvert": null,
-        "outputDir": "C:\\Users\\mohit\\Downloads\\GigBid\\apps\\web\\test-results",
+        "outputDir": "C:\\Users\\mohit\\Downloads\\GigBid\\tmp\\playwright-results",
         "repeatEach": 1,
         "retries": 0,
-        "metadata": {
-          "actualWorkers": 1
-        },
+        "metadata": {},
         "name": "",
         "testDir": "C:\\Users\\mohit\\Downloads\\GigBid\\apps\\web\\tests\\e2e",
         "snapshotDir": "C:\\Users\\mohit\\Downloads\\GigBid\\apps\\web\\tests\\e2e",
@@ -73,7 +68,8 @@
       [
         "html",
         {
-          "open": "never"
+          "open": "never",
+          "outputFolder": "../../docs/test-reports/playwright"
         }
       ],
       [
@@ -113,22 +109,8 @@
               "expectedStatus": "passed",
               "projectId": "",
               "projectName": "",
-              "results": [
-                {
-                  "workerIndex": 0,
-                  "parallelIndex": 0,
-                  "status": "passed",
-                  "duration": 5556,
-                  "errors": [],
-                  "stdout": [],
-                  "stderr": [],
-                  "retry": 0,
-                  "startTime": "2026-11-15T16:30:24.341Z",
-                  "annotations": [],
-                  "attachments": []
-                }
-              ],
-              "status": "expected"
+              "results": [],
+              "status": "skipped"
             }
           ],
           "id": "b163ed09f68681248ada-59f0e0a38277726b6abf",
@@ -147,22 +129,8 @@
               "expectedStatus": "passed",
               "projectId": "",
               "projectName": "",
-              "results": [
-                {
-                  "workerIndex": 0,
-                  "parallelIndex": 0,
-                  "status": "passed",
-                  "duration": 12768,
-                  "errors": [],
-                  "stdout": [],
-                  "stderr": [],
-                  "retry": 0,
-                  "startTime": "2026-11-15T16:30:30.632Z",
-                  "annotations": [],
-                  "attachments": []
-                }
-              ],
-              "status": "expected"
+              "results": [],
+              "status": "skipped"
             }
           ],
           "id": "b163ed09f68681248ada-018e617e0e4b9fe62bb5",
@@ -181,22 +149,8 @@
               "expectedStatus": "passed",
               "projectId": "",
               "projectName": "",
-              "results": [
-                {
-                  "workerIndex": 0,
-                  "parallelIndex": 0,
-                  "status": "passed",
-                  "duration": 2454,
-                  "errors": [],
-                  "stdout": [],
-                  "stderr": [],
-                  "retry": 0,
-                  "startTime": "2026-11-15T16:30:43.435Z",
-                  "annotations": [],
-                  "attachments": []
-                }
-              ],
-              "status": "expected"
+              "results": [],
+              "status": "skipped"
             }
           ],
           "id": "b163ed09f68681248ada-a3b8df79b17062ea886f",
@@ -215,22 +169,8 @@
               "expectedStatus": "passed",
               "projectId": "",
               "projectName": "",
-              "results": [
-                {
-                  "workerIndex": 0,
-                  "parallelIndex": 0,
-                  "status": "passed",
-                  "duration": 2426,
-                  "errors": [],
-                  "stdout": [],
-                  "stderr": [],
-                  "retry": 0,
-                  "startTime": "2026-11-15T16:30:45.920Z",
-                  "annotations": [],
-                  "attachments": []
-                }
-              ],
-              "status": "expected"
+              "results": [],
+              "status": "skipped"
             }
           ],
           "id": "b163ed09f68681248ada-046932be635a1ce63243",
@@ -249,22 +189,8 @@
               "expectedStatus": "passed",
               "projectId": "",
               "projectName": "",
-              "results": [
-                {
-                  "workerIndex": 0,
-                  "parallelIndex": 0,
-                  "status": "passed",
-                  "duration": 1946,
-                  "errors": [],
-                  "stdout": [],
-                  "stderr": [],
-                  "retry": 0,
-                  "startTime": "2026-11-15T16:30:48.379Z",
-                  "annotations": [],
-                  "attachments": []
-                }
-              ],
-              "status": "expected"
+              "results": [],
+              "status": "skipped"
             }
           ],
           "id": "b163ed09f68681248ada-b6b5eec51309bfc21d99",
@@ -283,22 +209,8 @@
               "expectedStatus": "passed",
               "projectId": "",
               "projectName": "",
-              "results": [
-                {
-                  "workerIndex": 0,
-                  "parallelIndex": 0,
-                  "status": "passed",
-                  "duration": 3012,
-                  "errors": [],
-                  "stdout": [],
-                  "stderr": [],
-                  "retry": 0,
-                  "startTime": "2026-11-15T16:30:50.355Z",
-                  "annotations": [],
-                  "attachments": []
-                }
-              ],
-              "status": "expected"
+              "results": [],
+              "status": "skipped"
             }
           ],
           "id": "b163ed09f68681248ada-a371cf36b898a5fc0737",
@@ -317,22 +229,8 @@
               "expectedStatus": "passed",
               "projectId": "",
               "projectName": "",
-              "results": [
-                {
-                  "workerIndex": 0,
-                  "parallelIndex": 0,
-                  "status": "passed",
-                  "duration": 5886,
-                  "errors": [],
-                  "stdout": [],
-                  "stderr": [],
-                  "retry": 0,
-                  "startTime": "2026-11-15T16:30:53.397Z",
-                  "annotations": [],
-                  "attachments": []
-                }
-              ],
-              "status": "expected"
+              "results": [],
+              "status": "skipped"
             }
           ],
           "id": "b163ed09f68681248ada-45c038e55201460f6e2c",
@@ -345,10 +243,10 @@
   ],
   "errors": [],
   "stats": {
-    "startTime": "2026-11-15T16:30:07.403Z",
-    "duration": 53186.287000000004,
-    "expected": 7,
-    "skipped": 0,
+    "startTime": "2026-11-15T17:09:14.347Z",
+    "duration": 90.85400000000004,
+    "expected": 0,
+    "skipped": 7,
     "unexpected": 0,
     "flaky": 0
   }

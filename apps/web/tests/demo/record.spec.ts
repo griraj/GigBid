@@ -62,5 +62,5 @@ test('record actual local synthetic workflow',async({page})=>{
   await page.waitForTimeout(Math.max(0,180_000-(Date.now()-started)));
   const video=page.video();
   await page.close();
-  if(video)await video.saveAs(path.resolve('../../output/demo/GigBid_3min_Demo.webm'));
+  if(video)await video.saveAs(path.resolve('../../docs/demo/GigBid_Reference_Demo.webm'));
 });

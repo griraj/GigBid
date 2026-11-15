@@ -11,7 +11,7 @@ Candidate external sources provided by the user: asaniczka Upwork postings 2024 
 
 Actual local runs used `nomic-embed-text`, `qwen2.5:0.5b` and `qwen3:0.6b`
 from the Ollama model library. Weights are stored by the user's Ollama service,
-not committed or included in the source ZIP. The Qwen model pages identify the
+not committed or included in the submission folder. The Qwen model pages identify the
 selected small variants as Apache 2.0; consult each model's own terms before
 redistribution. The embedding model has its own model card and licence.
 

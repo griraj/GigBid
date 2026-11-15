@@ -1,13 +1,14 @@
 # Operator runbook
 
-Use the Windows commands in README.md for the API and frontend. The working
-completion environment is `.venv-current`; the supplied `.venv` referenced a
-missing Python interpreter. Exact tested versions are recorded in
-`evals/results/environment.json`.
+Use the Windows commands in README.md to create `.venv`, install dependencies
+and start the API and frontend. Exact validation versions are recorded in
+`evals/results/environment.json`. Local dependencies are not part of the clean
+submission folder.
 
 ## Persistence and recovery
 
-Set `GIGBID_DATA_DIR` to a persistent writable directory. The API and MCP
+The default runtime directory is the ignored `local_data/` folder. Set
+`GIGBID_DATA_DIR` to override it with a persistent writable directory. The API and MCP
 subprocesses share marketplace, checkpoint, memory and run-index paths. Set
 `GIGBID_DB_PATH` only for an intentional marketplace override. The Pipeline
 reopens saved interrupted runs after refresh. Without the SQLite saver package,

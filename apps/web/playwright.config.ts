@@ -4,14 +4,17 @@ import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../..');
-const localPython=path.join(root,'.venv-current','Scripts','python.exe');
-const python=process.env.GIGBID_PYTHON||(existsSync(localPython)?localPython:'python');
+const localPythons=process.platform==='win32'
+  ? [path.join(root,'.venv','Scripts','python.exe'),path.join(root,'.venv-current','Scripts','python.exe')]
+  : [path.join(root,'.venv','bin','python'),path.join(root,'.venv-current','bin','python')];
+const python=process.env.GIGBID_PYTHON||localPythons.find(existsSync)||'python';
 export default defineConfig({
   testDir:'./tests/e2e',
   timeout:120_000,
   expect:{timeout:90_000},
   workers:1,
-  reporter:[['list'],['html',{open:'never'}],['json',{outputFile:'../../evals/results/playwright.json'}]],
+  reporter:[['list'],['html',{open:'never',outputFolder:'../../docs/test-reports/playwright'}],['json',{outputFile:'../../evals/results/playwright.json'}]],
+  outputDir:'../../tmp/playwright-results',
   use:{baseURL:'http://127.0.0.1:5176',trace:'retain-on-failure',screenshot:'only-on-failure'},
   webServer:[
     {command:`"${python}" -m uvicorn apps.api.main:app --host 127.0.0.1 --port 8010`,cwd:root,

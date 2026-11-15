@@ -8,8 +8,8 @@
 - Portfolio MCP source/Docker installation: https://github.com/griraj/GigBid/tree/main/mcp_servers/portfolio
 - Actual authenticated hosted before/after performance checks, public-link checks,
   Python tests and browser workflow tests are recorded in evals/results/.
-- The report is generated under output/pdf; the source and final demo archive
-  are generated under output/submission. Check the final page count and hashes.
+- The current report is docs/GigBid_RnD_Report.pdf. The source is in this folder;
+  the browser test report is docs/test-reports/playwright/index.html.
 - START_HERE.md gives extraction instructions and a three-minute recording plan.
 
 ## Your remaining submission steps
@@ -39,7 +39,7 @@ API responses, reply/hire rates or hidden-test results.
 
 Full multi-user tenancy, encrypted OAuth, Redis scheduling/worker infrastructure,
 Postgres Store memory, all required independent studies and hosted tracing
-remain documented in docs/COMPLETION_STATUS.md. A demo-ready archive is not a
+remain documented in docs/COMPLETION_STATUS.md. A demo-ready folder is not a
 claim that these rubric requirements have been completed.
 
 The included earlier scripted recording is a reference. Record the current

@@ -1,9 +1,8 @@
 # Current completion status
 
-This document supersedes status statements in the historical Priority 1/2
-release notes and the old `GigBid_Engineering_Review.pdf`.
+This document records implemented features, validation and remaining rubric gaps.
 
-## Implemented in the completion pass
+## Implemented functionality
 
 - Shared API/MCP persistent data paths, a durable run index and reopening
   pending approvals from Pipeline after refresh.
@@ -27,7 +26,7 @@ release notes and the old `GigBid_Engineering_Review.pdf`.
 - Playwright approval workflows, regression gates in CI, an actual captioned
   browser recording, a GIF and code-rendered graphs.
 - A report builder within the ten-page limit, article draft, submission checklist, source
-  archive builder and Render single-container deployment preparation.
+  browser test report and Render single-container deployment configuration.
 
 ## Still unfinished locally
 
@@ -57,7 +56,7 @@ The final performance change passed Python/contract tests and browser approval,
 editing, rejection, degraded-mode, recovery, interview and negotiation scenarios.
 Exact counts and timings are in the result files. Reused MCP sessions retain
 role allowlists and per-request audit trace IDs; timeout recovery and schema
-snapshots are covered by tests. No reviewer credential is bundled.
+snapshots are covered by tests. No reviewer credential is stored in the submission folder.
 
-The ZIP is demo-ready, not a claim of complete rubric compliance: the unfinished
+The submission folder is demo-ready, not a claim of complete rubric compliance: the unfinished
 production items and independent studies listed above remain explicit.

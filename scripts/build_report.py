@@ -1,6 +1,5 @@
 """Generate an evidence-backed engineering review; missing studies stay explicit."""
 import json
-import shutil
 from pathlib import Path
 from xml.sax.saxutils import escape
 from reportlab.lib import colors
@@ -22,7 +21,7 @@ def build():
     models=json.loads((RESULTS/'open_model_comparison.json').read_text())
     performance=json.loads((RESULTS/'mcp_performance.json').read_text())
     live=json.loads((RESULTS/'live_performance_before.json').read_text())
-    output=ROOT/'output/pdf/GigBid_RnD_Report.pdf'
+    output=ROOT/'docs/GigBid_RnD_Report.pdf'
     output.parent.mkdir(parents=True,exist_ok=True)
     styles=getSampleStyleSheet()
     styles.add(ParagraphStyle(name='BodyGig',fontName='Helvetica',fontSize=10,leading=15,spaceAfter=10))
@@ -107,7 +106,7 @@ def build():
     page('5 | Change request, extension and deployment')
     p('<b>Instructor policy change.</b> The 2 November update was not supplied. No invented update, implementation time or before/after grade is reported. Existing prohibitions are used for development. block_risk_flags is configuration so known injection and prohibited-job flags can become hard stops without changing graph wiring.')
     p('<b>Signature extension X5.</b> The negotiation subgraph drafts rate-floor responses from explicit hourly offers and requires the parent conversation approval before sending. Below-floor offers produce a minimum-rate counteroffer and a walk-away condition; missing offers trigger clarification. This implements a local coaching mechanism. GigSim achieved-rate versus offered-rate evaluation remains unavailable and no client acceptance is claimed.')
-    p('<b>Deployment.</b> The public app is https://gigbid-ti71.onrender.com/ and the public repository is https://github.com/griraj/GigBid. Verification is recorded in evals/results/public_links.json. Render Free uses no disk: SQLite state is lost on restart, redeploy or spin-down. The local Compose volume does not change that hosting limitation. A private reviewer token is required and excluded from this report and the source archive.')
+    p('<b>Deployment.</b> The public app is https://gigbid-ti71.onrender.com/ and the public repository is https://github.com/griraj/GigBid. Verification is recorded in evals/results/public_links.json. Render Free uses no disk: SQLite state is lost on restart, redeploy or spin-down. The local Compose volume does not change that hosting limitation. A private reviewer token is required and excluded from this report and the submission folder.')
     p('<b>Production limitations.</b> This release is a single-reviewer deployment candidate. It does not complete multi-user auth, encrypted OAuth, a Redis worker, distributed rate limiting, full-stack Postgres/vector/model Compose services, end-to-end hosted tracing or a 30-job GigSim CI gate. Do not expose private client data or describe the token gate as full account management.')
     p('<b>Browser verification.</b> Playwright scenarios cover reviewer entry, approval, rejection with a reason, edited approval, a simulated outage banner and reopening approval after refresh. The executed report is retained under apps/web/playwright-report and evals/results/playwright.json when available. Verify the final recorded status before submission.')
 
@@ -140,7 +139,7 @@ def build():
 
     page('7 | Safety, reproducibility and submission status')
     p('<b>Never automate.</b> No scraping, browser-cookie marketplace access, unapproved send, fabricated portfolio achievement or fabricated client outcome. Imported real job exports remain research-only in local mode. Approval edits pass verification again; deterministic write keys protect retries. Remaining risks include lexical verification errors, subtle injections, single-user identity and unverified external route mappings.')
-    p('<b>Reproduce.</b> Install the project with test dependencies and langgraph-checkpoint-sqlite. Run python -m pytest; python -m evals.runners.compare_retrieval; python -m evals.runners.evaluate_system; python -m evals.runners.check_gates. Build the web app and run npm run test:e2e. scripts/package_submission.py creates an allowlisted source ZIP with file hashes and excludes databases, environments, dependencies and generated private runtime state.')
+    p('<b>Reproduce.</b> Follow START_HERE.md to install dependencies and run the application. Run python -m pytest; python -m evals.runners.compare_retrieval; python -m evals.runners.evaluate_system; python -m evals.runners.check_gates. Build the web app and run npm run test:e2e. The current report is docs/GigBid_RnD_Report.pdf; the browser report is docs/test-reports/playwright/index.html. Generated runtime files are kept in local_data/ and temporary checks in tmp/.')
     p('<b>Required external evidence.</b> Real instructor dev evaluation and hidden test results; simulator reply/hire rates; the 40-task tool study; 50-job orchestration comparison; larger independent open-model comparison; calibrated judge and blind panel; the real policy update; public traces and uploaded final demo; official third-party authorizations. Unknown values remain unavailable, never zero-filled.')
     p('<b>Submission.</b> Attach this PDF only after reviewing its limitations and replacing pending evidence where possible. Provide the verified live app URL, public repository URL, three-minute recording, installable Portfolio MCP and published article in one Classroom submission. Put reviewer credentials only in the private Classroom comment. Hosting must remain active until grades are released. The current deadline/extension needs confirmation with the instructor.')
     p('<b>References.</b> Primary source: supplied AI-4016 GigBid specification (16 PDF pages). Code evidence: agent/graphs/, agent/mcp_client.py, mcp_servers/, rag/, apps/api/, apps/web/. Experimental evidence: evals/results/synthetic_retrieval.json, synthetic_system_before.json and synthetic_system.json. Software primary references: github.com/modelcontextprotocol/python-sdk; docs.langchain.com/oss/python/langgraph/; fastapi.tiangolo.com; playwright.dev. Package versions are recorded in the environment lock file when regenerated.')
@@ -150,7 +149,6 @@ def build():
         canvas.drawRightString(547,29,str(doc.page))
     SimpleDocTemplate(str(output),pagesize=(595.28,841.89),leftMargin=50,rightMargin=50,topMargin=48,bottomMargin=52,
         title='GigBid R&D Engineering Review').build(story,onFirstPage=footer,onLaterPages=footer)
-    shutil.copyfile(output,ROOT/'docs/GigBid_RnD_Report.pdf')
     print(output)
 
 

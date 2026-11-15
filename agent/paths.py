@@ -6,7 +6,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def data_path(filename: str) -> Path:
-    directory = Path(os.getenv('GIGBID_DATA_DIR', str(ROOT)))
+    directory = Path(os.getenv('GIGBID_DATA_DIR', str(ROOT / 'local_data')))
     directory.mkdir(parents=True, exist_ok=True)
     return directory / filename
 

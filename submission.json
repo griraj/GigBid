@@ -9,10 +9,10 @@
   "repository": {
     "url": "https://github.com/griraj/GigBid",
     "verified_public": true,
-    "local_changes_pushed": true
+    "local_changes_pushed": false
   },
   "demo": {
-    "local_path": "output/demo/GigBid_3min_Demo.webm",
+    "local_path": "docs/demo/GigBid_Reference_Demo.webm",
     "url": null,
     "verified_public": false,
     "note": "Earlier scripted reference capture included; record and upload your own final demonstration."
@@ -29,7 +29,7 @@
     "verified_public": true
   },
   "report": {
-    "local_path": "output/pdf/GigBid_RnD_Report.pdf"
+    "local_path": "docs/GigBid_RnD_Report.pdf"
   },
   "reviewer_credentials": "Enter directly in a private GCR comment; never store them here.",
   "deadline": {
@@ -42,5 +42,9 @@
     "Multi-user production, Redis worker and full prescribed infrastructure remain unfinished",
     "Final demo upload, third-party OAuth and hosted public tracing remain outstanding",
     "Local synthetic/model experiments are not instructor or real-client outcomes"
-  ]
+  ],
+  "test_reports": {
+    "python": "evals/results/tests.xml",
+    "browser": "docs/test-reports/playwright/index.html"
+  }
 }

@@ -28,15 +28,14 @@ Start with [START_HERE.md](START_HERE.md) for recording and extraction instructi
 
 ## Run on Windows
 
-Python 3.12 is the deployment target; this completion pass was tested with
-Python 3.14 because the supplied 3.12 virtual environment pointed to a missing
-interpreter. Exact executed package versions are in
+Python 3.12 is the deployment target; recorded local validation used Python
+3.14. Exact executed package versions are in
 [environment.json](evals/results/environment.json). Use Node 20 or newer.
 
 ```powershell
-python -m venv .venv-current
-.\.venv-current\Scripts\python.exe -m pip install -e ".[test,neural-lite,report]" langgraph-checkpoint-sqlite
-.\.venv-current\Scripts\python.exe -m uvicorn apps.api.main:app --host 127.0.0.1 --port 8000
+python -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -e ".[test,neural-lite,report]" langgraph-checkpoint-sqlite
+.\.venv\Scripts\python.exe -m uvicorn apps.api.main:app --host 127.0.0.1 --port 8000
 ```
 
 In another terminal:
@@ -61,11 +60,11 @@ MCP and hourly negotiation drafts. All default marketplace records are synthetic
 Start Ollama, download the explicit models, then enable the backends:
 
 ```powershell
-.\.venv-current\Scripts\python.exe scripts/prepare_open_models.py
+.\.venv\Scripts\python.exe scripts/prepare_open_models.py
 $env:GIGBID_LLM_BACKEND='ollama'
 $env:GIGBID_RAG_BACKEND='ollama-vector'
 $env:GIGBID_MCP_TIMEOUT='120'
-.\.venv-current\Scripts\python.exe -m uvicorn apps.api.main:app --host 127.0.0.1 --port 8000
+.\.venv\Scripts\python.exe -m uvicorn apps.api.main:app --host 127.0.0.1 --port 8000
 ```
 
 The writer model is configured in `agent/config.yaml`; the small local profile
@@ -113,15 +112,14 @@ No reply/hire rates, calibrated judge scores or hidden-test results are invented
 See [evaluation instructions](docs/EVALUATION.md) for supplied dev-label formats
 and reproducible commands. A verifier rejection is not an oracle truth label.
 
-## Validate and prepare submission
+## Validate the submission folder
 
 ```powershell
-.\.venv-current\Scripts\python.exe -m pytest -q
-.\.venv-current\Scripts\python.exe -m evals.runners.compare_retrieval
-.\.venv-current\Scripts\python.exe -m evals.runners.evaluate_system
-.\.venv-current\Scripts\python.exe -m evals.runners.check_gates
-.\.venv-current\Scripts\python.exe scripts/build_report.py
-.\.venv-current\Scripts\python.exe scripts/package_submission.py
+.\.venv\Scripts\python.exe -m pytest -q
+.\.venv\Scripts\python.exe -m evals.runners.compare_retrieval
+.\.venv\Scripts\python.exe -m evals.runners.evaluate_system
+.\.venv\Scripts\python.exe -m evals.runners.check_gates
+.\.venv\Scripts\python.exe scripts/build_report.py
 ```
 
 From `apps/web`, run `npm.cmd run build`, `npx.cmd playwright install chromium`
@@ -137,8 +135,11 @@ The current recording is silent and uses clearly identified synthetic data.
 - [Deployment preparation](docs/DEPLOYMENT.md)
 - [AI usage disclosure](docs/AI_USAGE.md)
 
-The report, recording and source bundle are generated beneath `output/`.
-The older `docs/GigBid_Engineering_Review.pdf` is historical and superseded.
+The submission files are kept directly in this project folder. The current
+report is `docs/GigBid_RnD_Report.pdf`, the browser report is
+`docs/test-reports/playwright/index.html`, and the earlier reference recording
+is `docs/demo/GigBid_Reference_Demo.webm`. Runtime databases and traces are
+created in the ignored `local_data/` directory. No ZIP is generated.
 The Render blueprint uses the Free web service plan without a persistent disk.
 It sleeps when idle, and local data and pending approvals reset on service
 restart, redeploy or spin-down. The public app, article and MCP source links are

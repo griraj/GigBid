@@ -1,6 +1,0 @@
-agent
-apps
-data
-evals
-mcp_servers
-rag

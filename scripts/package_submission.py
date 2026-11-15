@@ -7,7 +7,7 @@ import shutil
 
 ROOT = Path(__file__).resolve().parents[1]
 DIRECTORIES = ('agent', 'apps', 'data', 'docs', 'evals', 'infra', 'mcp_servers', 'rag', 'tests', 'scripts', '.github')
-FILES = ('README.md', 'START_HERE.md', 'Makefile', 'pyproject.toml', '.env.example', '.gitignore', '.dockerignore', 'render.yaml', 'requirements-lock.txt', 'submission.json')
+FILES = ('README.md', 'START_HERE.md', 'Makefile', 'pyproject.toml', '.env.example', '.gitignore', '.gitattributes', '.dockerignore', 'render.yaml', 'requirements-lock.txt', 'submission.json')
 SKIP = {'node_modules', '__pycache__', 'dist', 'processed', '.pytest_cache', 'playwright-report', 'test-results'}
 
 

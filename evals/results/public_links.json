@@ -1,0 +1,22 @@
+{
+  "checked_at": "2026-11-15T16:25:26.263199+00:00",
+  "repository": {
+    "url": "https://github.com/griraj/GigBid",
+    "public": true
+  },
+  "application": {
+    "url": "https://gigbid-ti71.onrender.com/",
+    "landing_status": 200,
+    "landing_attempts": [
+      200
+    ],
+    "health": {
+      "status": "ok",
+      "mode": "local",
+      "rag_backend": "lexical",
+      "tool_backend": "mcp",
+      "durable": true
+    }
+  },
+  "method": "Unauthenticated HTTP; no private reviewer credential stored"
+}

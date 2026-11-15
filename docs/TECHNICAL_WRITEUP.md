@@ -1,8 +1,6 @@
 # Perfect retrieval was the least useful result in my freelancer copilot
 
-*Publication draft for a personal blog, Medium or LinkedIn. Publication has not
-been performed. Results refer to the committed synthetic development files,
-not to instructor data or real marketplace outcomes.*
+Experimental scope: authored synthetic development data and local model runs. These are not instructor data or real marketplace outcomes.
 
 I started GigBid with a practical question: can an assistant help a freelancer
 choose better opportunities without inventing experience or taking control of
@@ -106,6 +104,19 @@ not establish an attack success rate for a model-backed writer. They establish
 that the tested paths retained their human approval boundary, despite known
 screening weaknesses. That narrower conclusion is still useful.
 
+## Tool startup dominated the wait
+
+The deployed template/lexical path took about 68 seconds to analyse a job and
+12 seconds to approve it in an authenticated synthetic check. The workflow
+launched a new MCP subprocess and initialised the protocol for every tool call.
+That overhead repeated for individual skill searches, balance reads and writes.
+I replaced it with one reusable session per server, with bounded timeouts,
+per-call trace metadata and no automatic replay of writes. A local controlled
+comparison reduced repeat analysis from about 28 seconds to 0.18 seconds, and
+approval from about 6.6 seconds to 0.06 seconds. Those local timings are not
+hosted results; the first call still pays process startup. The raw measurements
+are in `mcp_performance.json` and `live_performance_before.json`.
+
 ## Persistence was a product feature hiding in deployment configuration
 
 Another issue appeared outside the agents. The original container mounted a
@@ -132,7 +143,10 @@ job descriptions or evidence lists rather than writing a useful proposal.
 Faster generation and fewer verifier rejections did not establish better
 proposal quality. The experiment is exploratory, not a calibrated model ranking.
 An earlier capped smoke run remains separate so its incomplete outputs cannot
-be mistaken for full proposal results.
+be mistaken for full proposal results. That failure led to structured opening,
+plan, question and evidence-ID fields. The application assembles the factual
+sentences from selected portfolio items and verifies the resulting draft.
+Uncited experience introductions are removed, and truncated drafts are blocked.
 
 ## What I would measure before making stronger claims
 

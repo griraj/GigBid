@@ -91,7 +91,13 @@ class MessageRequest(BaseModel):
     incoming:str=Field(min_length=1,max_length=5000)
 
 @app.get('/health')
-def health():return {'status':'ok','mode':os.getenv('GIGBID_MODE','local'),'rag_backend':os.getenv('GIGBID_RAG_BACKEND','lexical'),'tool_backend':os.getenv('GIGBID_TOOL_BACKEND','mcp'),'durable':type(checkpointer).__name__ in ('SqliteSaver','PostgresSaver')}
+def health():
+    ephemeral=os.getenv('GIGBID_STORAGE_EPHEMERAL','false').lower()=='true'
+    return {'status':'ok','mode':os.getenv('GIGBID_MODE','local'),
+        'rag_backend':os.getenv('GIGBID_RAG_BACKEND','lexical'),'tool_backend':os.getenv('GIGBID_TOOL_BACKEND','mcp'),
+        'durable':not ephemeral and type(checkpointer).__name__ in ('SqliteSaver','PostgresSaver'),
+        'storage_ephemeral':ephemeral,'mcp_sessions':'persistent' if os.getenv('GIGBID_MCP_PERSISTENT','1')!='0' else 'fresh',
+        'revision':os.getenv('RENDER_GIT_COMMIT','local')}
 
 @app.get('/jobs')
 def jobs(authorization:str|None=Header(None)):

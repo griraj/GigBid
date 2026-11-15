@@ -15,10 +15,13 @@ COPY apps/api ./apps/api
 COPY data ./data
 COPY rag ./rag
 COPY mcp_servers ./mcp_servers
+COPY docs/TECHNICAL_WRITEUP.md ./docs/TECHNICAL_WRITEUP.md
 RUN pip install --no-cache-dir . langgraph-checkpoint-sqlite
 COPY --from=web /web/dist ./apps/web/dist
 RUN useradd --create-home gigbid && mkdir -p /app/local_data && chown -R gigbid:gigbid /app
 ENV GIGBID_DATA_DIR=/app/local_data
+ENV GIGBID_MCP_PERSISTENT=1 OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1
+ENV GIGBID_STORAGE_EPHEMERAL=true
 USER gigbid
 EXPOSE 8000
 CMD ["uvicorn","apps.api.hosted:application","--host","0.0.0.0","--port","8000"]

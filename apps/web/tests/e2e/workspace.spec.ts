@@ -51,3 +51,17 @@ test('saved approval can be reopened after refresh',async({page})=>{
   await page.getByRole('button',{name:/Build churn prediction pipeline/}).first().click();
   await expect(page.getByRole('button',{name:/Approve/}).first()).toBeVisible();
 });
+
+test('interview slots and negotiation replies retain approval',async({page})=>{
+  await login(page);
+  await page.getByRole('button',{name:'Messages',exact:true}).click();
+  await page.getByLabel('Incoming client message').fill('Can we schedule an interview next week?');
+  await page.getByRole('button',{name:'Draft response',exact:true}).click();
+  await expect(page.getByText(/Available simulated interview slots/)).toBeVisible();
+  await page.getByRole('button',{name:'Approve response',exact:true}).click();
+  await expect(page.getByText('sent',{exact:true})).toBeVisible();
+  await page.getByLabel('Incoming client message').fill('Our hourly rate is $15 per hour. Can you accept that rate?');
+  await page.getByRole('button',{name:'Draft response',exact:true}).click();
+  await expect(page.getByText(/My minimum hourly rate/)).toBeVisible();
+  await expect(page.getByRole('button',{name:'Approve response',exact:true})).toBeVisible();
+});

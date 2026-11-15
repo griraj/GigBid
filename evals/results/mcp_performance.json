@@ -1,0 +1,31 @@
+{
+  "scope": "local HTTP test client, real stdio MCP; synthetic template/lexical flow; no hosted latency inference",
+  "fresh_sessions": [
+    {
+      "iteration": 1,
+      "analysis_s": 32.80978300000061,
+      "approval_s": 6.304544200000237,
+      "status": "submitted"
+    },
+    {
+      "iteration": 2,
+      "analysis_s": 28.170205400001578,
+      "approval_s": 6.584796999999526,
+      "status": "submitted"
+    }
+  ],
+  "persistent_sessions": [
+    {
+      "iteration": 1,
+      "analysis_s": 8.947590200001287,
+      "approval_s": 0.07899279999764985,
+      "status": "submitted"
+    },
+    {
+      "iteration": 2,
+      "analysis_s": 0.18255289999797242,
+      "approval_s": 0.062346599999727914,
+      "status": "submitted"
+    }
+  ]
+}

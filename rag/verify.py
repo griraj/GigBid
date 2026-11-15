@@ -15,7 +15,7 @@ def verify(draft, evidence):
         if not sentence: continue
         citations=set(re.findall(r'\[([a-z][a-z0-9_-]{1,40})\]',sentence))
         # Explicit experience assertions without concrete evidence are dropped.
-        experience=bool(re.search(r'\b(?:I|we|our team|my team)\s+(?:built|implemented|delivered|trained|created|have|developed|led|managed|worked|achieved|increased|reduced|improved|specialize)|\bmy\s+(?:work|experience|clients|projects)\b|^\s*(?:[-*]\s*)?(?:built|implemented|delivered|trained|created|developed|achieved)\b',sentence,re.I))
+        experience=bool(re.search(r'\b(?:I|we|our team|my team)\s+(?:built|implemented|delivered|trained|created|have|developed|led|managed|worked|achieved|increased|reduced|improved|specialize)|\bmy\s+(?:work|experience|clients|projects)\b|\b(?:experience|experienced|expertise|proven track record)\b|^\s*(?:[-*]\s*)?(?:built|implemented|delivered|trained|created|developed|achieved)\b',sentence,re.I))
         numerics=re.findall(r'\b\d+(?:\.\d+)?%?\b',re.sub(r'\[[a-z][a-z0-9_-]{1,40}\]','',sentence))
         supported_numbers=' '.join(items[id]['text'] for id in citations if id in items)
         unsupported_number=bool(experience and any(number not in supported_numbers for number in numerics))

@@ -1,5 +1,5 @@
 import os
-from mcp.server.fastmcp import FastMCP
+from mcp.server.fastmcp import FastMCP,Context
 from mcp.types import ToolAnnotations
 from pydantic import Field
 from typing import Annotated
@@ -13,6 +13,11 @@ WRITE=ToolAnnotations(readOnlyHint=False,destructiveHint=True,idempotentHint=Tru
 JobId=Annotated[str,Field(min_length=1,max_length=128)]
 WriteKey=Annotated[str,Field(min_length=8,max_length=128)]
 ProposalText=Annotated[str,Field(min_length=10,max_length=10000)]
+
+def request_trace(ctx):
+    if ctx is not None:
+        return getattr(ctx.request_context.meta,'trace_id','')
+    return os.getenv('GIGBID_TRACE_ID','')
 
 @mcp.tool(annotations=READ)
 def search_jobs(query:str='')->list[dict]:
@@ -40,18 +45,18 @@ def list_messages(job_id:JobId)->list[dict]:
     return port.list_messages(job_id)
 
 @mcp.tool(annotations=WRITE)
-def create_proposal_draft(job_id:JobId,text:ProposalText,idempotency_key:WriteKey,dry_run:bool=True)->dict:
+def create_proposal_draft(job_id:JobId,text:ProposalText,idempotency_key:WriteKey,dry_run:bool=True,ctx:Context=None)->dict:
     """Create an unsent proposal draft after GigBid approval; preview by default."""
-    return port.create_proposal_draft(job_id,text,idempotency_key,dry_run,trace_id=os.getenv('GIGBID_TRACE_ID',''))
+    return port.create_proposal_draft(job_id,text,idempotency_key,dry_run,trace_id=request_trace(ctx))
 
 @mcp.tool(annotations=WRITE)
-def submit_proposal(job_id:JobId,text:ProposalText,idempotency_key:WriteKey,dry_run:bool=True)->dict:
+def submit_proposal(job_id:JobId,text:ProposalText,idempotency_key:WriteKey,dry_run:bool=True,ctx:Context=None)->dict:
     """Spend Connects and submit only after human approval; preview by default."""
-    return port.submit_proposal(job_id,text,idempotency_key,dry_run,trace_id=os.getenv('GIGBID_TRACE_ID',''))
+    return port.submit_proposal(job_id,text,idempotency_key,dry_run,trace_id=request_trace(ctx))
 
 @mcp.tool(annotations=WRITE)
-def send_message(job_id:JobId,body:ProposalText,idempotency_key:WriteKey,dry_run:bool=True)->dict:
+def send_message(job_id:JobId,body:ProposalText,idempotency_key:WriteKey,dry_run:bool=True,ctx:Context=None)->dict:
     """Send a client message only after human approval; preview by default."""
-    return port.send_message(job_id,body,idempotency_key,dry_run,trace_id=os.getenv('GIGBID_TRACE_ID',''))
+    return port.send_message(job_id,body,idempotency_key,dry_run,trace_id=request_trace(ctx))
 
 if __name__=='__main__':mcp.run()

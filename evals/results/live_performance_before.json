@@ -1,0 +1,50 @@
+{
+  "url": "https://gigbid-ti71.onrender.com",
+  "scope": "authorised synthetic local job; real HTTP and MCP timing",
+  "health": {
+    "status": "ok",
+    "mode": "local",
+    "rag_backend": "lexical",
+    "tool_backend": "mcp",
+    "durable": true
+  },
+  "jobs_seconds": 0.31718289999844274,
+  "analysis_seconds": 67.99438430000009,
+  "nodes": [
+    {
+      "node": "analyst",
+      "elapsed_s": 0.3651313000009395
+    },
+    {
+      "node": "risk",
+      "elapsed_s": 13.757367100002739
+    },
+    {
+      "node": "fit",
+      "elapsed_s": 55.15375680000216
+    },
+    {
+      "node": "decide",
+      "elapsed_s": 55.15447910000148
+    },
+    {
+      "node": "price",
+      "elapsed_s": 61.057279200002085
+    },
+    {
+      "node": "writer",
+      "elapsed_s": 61.05746630000067
+    },
+    {
+      "node": "critic",
+      "elapsed_s": 61.13751670000056
+    },
+    {
+      "node": "compliance",
+      "elapsed_s": 61.1426973000016
+    }
+  ],
+  "analysis_status": "awaiting_approval",
+  "approval_seconds": 11.754608300001564,
+  "approval_status": "submitted"
+}

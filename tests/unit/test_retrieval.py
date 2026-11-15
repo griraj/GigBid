@@ -21,3 +21,10 @@ def test_unrelated_claim_cannot_borrow_valid_citation():
     clean,rejected=verify(draft,[EVIDENCE[0]])
     assert clean == ''
     assert len(rejected)==2
+
+
+def test_uncited_experience_in_profile_introduction_is_removed():
+    draft=ProposalDraft(text='I am a Python developer with experience in building churn prediction pipelines. I would confirm your milestones.',claim_evidence={})
+    clean,rejected=verify(draft,EVIDENCE)
+    assert len(rejected)==1
+    assert clean=='I would confirm your milestones.'

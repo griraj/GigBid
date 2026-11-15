@@ -15,6 +15,14 @@ services:
         value: local
       - key: GIGBID_TOOL_BACKEND
         value: mcp
+      - key: GIGBID_MCP_PERSISTENT
+        value: '1'
+      - key: GIGBID_STORAGE_EPHEMERAL
+        value: 'true'
+      - key: OPENBLAS_NUM_THREADS
+        value: '1'
+      - key: OMP_NUM_THREADS
+        value: '1'
       - key: GIGBID_DATA_DIR
         value: /app/local_data
       - key: GIGBID_API_TOKEN

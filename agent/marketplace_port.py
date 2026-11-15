@@ -8,6 +8,8 @@ from pathlib import Path
 from data.synthetic import JOBS, CLIENTS
 from data.ingest import load_jobs
 import re
+from functools import lru_cache
+from agent.paths import tenant_marketplace_path
 
 def mask_pii(obj):
     """Redact contact and payment markers in audit copies, not submitted text."""
@@ -95,3 +97,8 @@ def build_marketplace(mode='local',db_path='gigbid.sqlite'):
     if mode=='gigsim': return GigSimMarketplace(os.environ['GIGBID_GIGSIM_URL'],os.environ['GIGBID_GIGSIM_TOKEN'])
     if mode=='upwork': raise MarketplaceUnavailable('Upwork OAuth connection has not been authorized; live mode disabled safely')
     raise ValueError('Unknown marketplace mode')
+
+
+@lru_cache(maxsize=128)
+def local_tenant_marketplace(owner_id: str):
+    return LocalMarketplace(tenant_marketplace_path(owner_id))

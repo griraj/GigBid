@@ -4,6 +4,15 @@ This document records implemented features, validation and remaining rubric gaps
 
 ## Implemented functionality
 
+- Phase 3 and Phase 4 additions: invitation-based account sessions;
+  account-scoped run ownership, simulator ledgers and MCP portfolio searches;
+  encrypted GitHub OAuth token vault (authorization still requires credentials);
+  document uploads; generated TypeScript OpenAPI client; Postgres checkpoint and
+  LangGraph memory store configuration; Redis/Arq worker, scheduled searches;
+  conservative execution bounds; and a non-fabricating 40-task Ollama study
+  harness. See `docs/PHASE3_IMPLEMENTATION.md` and
+  `docs/PHASE4_IMPLEMENTATION.md` for tested/untested boundaries.
+
 - Shared API/MCP persistent data paths, a durable run index and reopening
   pending approvals from Pipeline after refresh.
 - A real LangGraph update stream consumed by the frontend. The older GET
@@ -30,12 +39,13 @@ This document records implemented features, validation and remaining rubric gaps
 
 ## Still unfinished locally
 
-Multi-user tenancy, encrypted OAuth, full Redis worker/scheduler integration,
-Postgres Store memory, token/step-budget dead-letter handling, generated
-OpenAPI client, full checkpoint replay, paragraph regeneration, complete
-portfolio/account onboarding, and the prescribed complete Compose stack remain
-work. A local trace file is not a hosted tracing product. V3 cross-encoder
-weights have not been executed by the new sqlite-vec backend.
+Tenant-aware production Postgres migration for all account and application
+tables, official Upwork OAuth/tool calls, independently verified live GigSim,
+full user-specific indexing across all RAG backends, exact token/cost budgets,
+full checkpoint replay and complete dead-letter recovery still remain work.
+The extended Compose file has not been exercised with Docker in this
+workspace. A local trace file is not a hosted tracing product. V3
+cross-encoder weights have not been executed by the sqlite-vec backend.
 
 ## Requires external resources or account access
 

@@ -13,6 +13,7 @@ class RunRegistry:
             columns = {row[1] for row in self.db.execute('PRAGMA table_info(runs)')}
             if 'owner_id' not in columns:
                 self.db.execute("ALTER TABLE runs ADD COLUMN owner_id TEXT NOT NULL DEFAULT 'reviewer'")
+            self.db.execute('CREATE TABLE IF NOT EXISTS run_failures (thread_id TEXT PRIMARY KEY, code TEXT NOT NULL, occurred REAL NOT NULL)')
 
     def add(self, thread_id, kind, owner_id='reviewer'):
         with self.lock, self.db:
@@ -32,3 +33,13 @@ class RunRegistry:
     def exists(self, thread_id: str) -> bool:
         with self.lock:
             return self.db.execute('SELECT 1 FROM runs WHERE thread_id=?', (thread_id,)).fetchone() is not None
+
+    def fail(self,thread_id:str,code:str):
+        with self.lock,self.db:
+            self.db.execute('INSERT INTO run_failures VALUES (?,?,?) ON CONFLICT(thread_id) DO UPDATE SET code=excluded.code,occurred=excluded.occurred',
+                            (thread_id,code,time.time()))
+
+    def failure(self,thread_id:str):
+        with self.lock:
+            row=self.db.execute('SELECT code FROM run_failures WHERE thread_id=?',(thread_id,)).fetchone()
+        return row[0] if row else None

@@ -7,11 +7,28 @@ server sessions; GIGBID_MCP_PERSISTENT=0 retains the fresh-session baseline.
 from __future__ import annotations
 import asyncio,json,os,sys
 from pathlib import Path
-from agent.paths import marketplace_path
+from agent.paths import marketplace_path,tenant_marketplace_path
 from agent.tracing import trace_id,event
 import time
 
 ROOT=Path(__file__).resolve().parents[1]
+
+PRIVATE_PREFIXES=('GIGBID_GITHUB_', 'GIGBID_UPWORK_', 'GIGBID_OAUTH_', 'LANGSMITH_API_KEY')
+PRIVATE_KEYS={'GIGBID_API_TOKEN','GIGBID_SIGNUP_INVITE','GIGBID_POSTGRES_PASSWORD',
+              'GIGBID_CHECKPOINT_DATABASE_URL','GIGBID_MEMORY_DATABASE_URL'}
+
+
+def scoped_mcp_env(server:str,owner_id:str,trace:str=''):
+    """MCP children receive only the credentials required for their server."""
+    environment={key:value for key,value in os.environ.items()
+                 if key not in PRIVATE_KEYS and not key.startswith(PRIVATE_PREFIXES)}
+    # GigSim access is scoped to Marketplace, not Portfolio or Workspace.
+    if server!='marketplace':
+        environment.pop('GIGBID_GIGSIM_TOKEN',None)
+    environment.update({'GIGBID_DB_PATH':tenant_marketplace_path(owner_id),
+                        'GIGBID_TENANT_ID':owner_id,'GIGBID_TRACE_ID':trace,
+                        'PYTHONPATH':str(ROOT)+os.pathsep+os.environ.get('PYTHONPATH','')})
+    return environment
 
 ALLOWLIST={
     'scout':{'marketplace':{'search_jobs','get_job'}},
@@ -30,7 +47,7 @@ class MCPPermissionDenied(PermissionError):pass
 class MCPRouter:
     def __init__(self,timeout:float=25):self.timeout=float(os.getenv('GIGBID_MCP_TIMEOUT',str(timeout)))
 
-    async def acall(self,role:str,server:str,name:str,arguments:dict|None=None):
+    async def acall(self,role:str,server:str,name:str,arguments:dict|None=None,owner_id:str='reviewer'):
         if name not in ALLOWLIST.get(role,{}).get(server,set()):
             raise MCPPermissionDenied(f'{role} is not authorized to invoke {server}.{name}')
         from mcp import ClientSession,StdioServerParameters
@@ -38,8 +55,7 @@ class MCPRouter:
         if server not in ('marketplace','portfolio','workspace'):raise MCPPermissionDenied('Unknown MCP server')
         params=StdioServerParameters(command=sys.executable,
                args=['-m',f'mcp_servers.{server}.server'],
-               env={**os.environ,'GIGBID_DB_PATH':marketplace_path(),'GIGBID_TRACE_ID':trace_id.get(),
-                    'PYTHONPATH':str(ROOT)+os.pathsep+os.environ.get('PYTHONPATH','')})
+               env=scoped_mcp_env(server,owner_id,trace_id.get()))
         try:
             started=time.perf_counter()
             event('mcp_call',role=role,server=server,tool=name,arguments=arguments or {})
@@ -63,19 +79,18 @@ class MCPRouter:
         except (TimeoutError,OSError,ExceptionGroup) as exc:
             raise MCPUnavailable(f'{server}.{name} is unavailable: {type(exc).__name__}') from exc
 
-    def call(self,role:str,server:str,name:str,arguments:dict|None=None):
+    def call(self,role:str,server:str,name:str,arguments:dict|None=None,owner_id:str='reviewer'):
         # Graph nodes and FastAPI routes are synchronous; never nest this in
         # an event-loop thread. FastAPI runs ordinary def routes in workers.
         if os.getenv('GIGBID_MCP_PERSISTENT','1')=='0':
-            return asyncio.run(self.acall(role,server,name,arguments))
+            return asyncio.run(self.acall(role,server,name,arguments,owner_id))
         if name not in ALLOWLIST.get(role,{}).get(server,set()):
             raise MCPPermissionDenied(f'{role} is not authorized to invoke {server}.{name}')
         if server not in ('marketplace','portfolio','workspace'):raise MCPPermissionDenied('Unknown MCP server')
         from mcp import StdioServerParameters
         from agent.mcp_pool import get_worker
         params=StdioServerParameters(command=sys.executable,args=['-m',f'mcp_servers.{server}.server'],
-            env={**os.environ,'GIGBID_DB_PATH':marketplace_path(),'GIGBID_TRACE_ID':'',
-                 'PYTHONPATH':str(ROOT)+os.pathsep+os.environ.get('PYTHONPATH','')})
+            env=scoped_mcp_env(server,owner_id))
         started=time.perf_counter()
         event('mcp_call',role=role,server=server,tool=name,arguments=arguments or {})
         try:

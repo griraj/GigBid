@@ -16,6 +16,7 @@ from pydantic import BaseModel,Field
 from langgraph.checkpoint.memory import MemorySaver
 from langgraph.types import Command
 from agent.marketplace_port import build_marketplace,MarketplaceUnavailable
+from agent.marketplace_port import local_tenant_marketplace
 from agent.graphs.bid_graph import build_bid_graph
 from agent.graphs.conversation_graph import build_conversation_graph
 from data.synthetic import EVIDENCE
@@ -28,11 +29,16 @@ from agent.paragraphs import regenerate_paragraph
 from apps.api.auth.accounts import Accounts
 from apps.api.auth.oauth import from_environment
 from data.portfolio_store import PortfolioStore
+from worker.searches import SavedSearches
 import secrets
 from agent.tracing import trace_id,event
 import json
 
 ROOT=Path(__file__).resolve().parents[2]
+if os.getenv('GIGBID_AUTH_MODE')=='multi' and os.getenv('GIGBID_MODE','local')!='local':
+    raise RuntimeError('Multi-user external marketplace requires per-account OAuth and tenant-aware adapter; disabled safely')
+if os.getenv('GIGBID_AUTH_MODE')=='multi' and os.getenv('GIGBID_TOOL_BACKEND','mcp')!='mcp':
+    raise RuntimeError('Multi-user evidence access requires tenant-scoped MCP routing')
 CONFIG=yaml.safe_load((ROOT/'agent/config.yaml').read_text())
 marketplace=build_marketplace(os.getenv('GIGBID_MODE','local'),marketplace_path())
 portfolio_items=EVIDENCE+load_portfolio()
@@ -59,10 +65,18 @@ else:
         checkpointer=MemorySaver()  # degraded: approval is not restart-durable
 bid_graph=build_bid_graph(marketplace,index,CONFIG,checkpointer)
 conversation_graph=build_conversation_graph(marketplace,checkpointer)
-memory=MemoryStore(data_path('memory.sqlite'))
+if os.getenv('GIGBID_MEMORY_DATABASE_URL'):
+    from langgraph.store.postgres import PostgresStore
+    from agent.memory.langgraph_store import LangGraphMemory
+    _memory_context=PostgresStore.from_conn_string(os.environ['GIGBID_MEMORY_DATABASE_URL'])
+    memory=LangGraphMemory(_memory_context.__enter__())
+    memory.store.setup()
+else:
+    memory=MemoryStore(data_path('memory.sqlite'))
 registry=RunRegistry(data_path('runs.sqlite'))
 accounts=Accounts(data_path('accounts.sqlite'))
 uploads=PortfolioStore(data_path('portfolio_uploads.sqlite'))
+saved_searches=SavedSearches(data_path('saved_searches.sqlite'))
 jobs_lock=threading.Lock()
 run_personas={}
 
@@ -92,6 +106,11 @@ def guard(authorization:str|None):
     expected=os.getenv('GIGBID_API_TOKEN','demo-reviewer-token')
     if not secrets.compare_digest(authorization or '',f'Bearer {expected}'):raise HTTPException(401,'Invalid reviewer token')
     return 'reviewer'
+
+def marketplace_for(owner_id:str):
+    if os.getenv('GIGBID_AUTH_MODE')=='multi' and os.getenv('GIGBID_MODE','local')=='local':
+        return local_tenant_marketplace(owner_id)
+    return marketplace
 
 def owned_thread(thread_id:str,authorization:str|None):
     owner=guard(authorization)
@@ -185,6 +204,27 @@ class AnalyzeRequest(BaseModel):
     job_id:str
     persona:str=Field(pattern='^(ai|web|analytics)$')
 
+class SavedSearchRequest(BaseModel):
+    query:str=Field(min_length=1,max_length=200)
+    persona:str=Field(pattern='^(ai|web|analytics)$')
+    interval_hours:int=Field(ge=4,le=168)
+
+@app.get('/searches')
+def list_saved_searches(authorization:str|None=Header(None)):
+    return saved_searches.list(guard(authorization))
+
+@app.post('/searches',status_code=201)
+def create_saved_search(req:SavedSearchRequest,authorization:str|None=Header(None)):
+    owner=guard(authorization)
+    try:return saved_searches.add(owner,req.query,req.persona,req.interval_hours)
+    except ValueError as exc:raise HTTPException(422,str(exc)) from exc
+
+@app.delete('/searches/{search_id}')
+def delete_saved_search(search_id:str,authorization:str|None=Header(None)):
+    owner=guard(authorization)
+    if not saved_searches.delete(owner,search_id):raise HTTPException(404,'Search not found')
+    return {'deleted':True}
+
 class ApprovalRequest(BaseModel):
     action:str=Field(pattern='^(approve|reject)$')
     text:str|None=None
@@ -204,7 +244,7 @@ async def queue_run(req:AnalyzeRequest,authorization:str|None=Header(None)):
     owner=guard(authorization)
     if not os.getenv('GIGBID_REDIS_URL') or not os.getenv('GIGBID_CHECKPOINT_DATABASE_URL'):
         raise HTTPException(503,'Background runs require Redis and shared Postgres checkpoints')
-    job=marketplace.get_job(req.job_id)
+    job=marketplace_for(owner).get_job(req.job_id)
     if job is None:raise HTTPException(404,'Job not found')
     from arq.connections import create_pool
     from worker.jobs import redis_settings
@@ -232,20 +272,21 @@ def health():
 
 @app.get('/jobs')
 def jobs(authorization:str|None=Header(None)):
-    guard(authorization)
-    try:return marketplace.search_jobs()
+    owner=guard(authorization)
+    try:return marketplace_for(owner).search_jobs()
     except MarketplaceUnavailable as exc:raise HTTPException(503, f'Marketplace unavailable: {exc}')
 
 @app.get('/jobs/{job_id}')
 def job_detail(job_id:str,authorization:str|None=Header(None)):
-    guard(authorization);j=marketplace.get_job(job_id)
+    owner=guard(authorization);j=marketplace_for(owner).get_job(job_id)
     if not j:raise HTTPException(404,'Job not found')
     return j
 
 @app.get('/portfolio')
 def portfolio(persona:str='ai',authorization:str|None=Header(None)):
     owner=guard(authorization)
-    return [e for e in portfolio_items if e['persona']==persona]+uploads.list(owner)
+    base=EVIDENCE if os.getenv('GIGBID_AUTH_MODE')=='multi' else portfolio_items
+    return [e for e in base if e['persona']==persona]+uploads.list(owner)
 
 @app.post('/portfolio/upload',status_code=201)
 async def upload_portfolio(file:UploadFile=File(...),authorization:str|None=Header(None)):
@@ -278,13 +319,18 @@ def delete_portfolio_upload(item_id:str,authorization:str|None=Header(None)):
 
 @app.post('/runs')
 def start_run(req:AnalyzeRequest,authorization:str|None=Header(None)):
-    owner=guard(authorization);j=marketplace.get_job(req.job_id)
+    owner=guard(authorization);j=marketplace_for(owner).get_job(req.job_id)
     if not j:raise HTTPException(404,'Job not found')
     thread_id=f'{req.persona}:{req.job_id}:{uuid4().hex[:12]}'
     registry.add(thread_id,'bid',owner)
     with jobs_lock:
         run_personas[thread_id]=req.persona
-    bid_graph.invoke({'job':j,'persona':req.persona,'owner_id':owner,'revision':0},config={'configurable':{'thread_id':thread_id}})
+    try:
+        bid_graph.invoke({'job':j,'persona':req.persona,'owner_id':owner,'revision':0},
+            config={'configurable':{'thread_id':thread_id},'recursion_limit':int(CONFIG.get('max_steps',18))})
+    except Exception as exc:
+        registry.fail(thread_id,type(exc).__name__)
+        raise HTTPException(503,'Analysis needs attention; check the saved run') from exc
     return {'thread_id':thread_id,**get_run_state(thread_id)}
 
 
@@ -302,7 +348,7 @@ def list_runs(authorization:str|None=Header(None)):
 @app.post('/runs/stream')
 def stream_run(req:AnalyzeRequest,authorization:str|None=Header(None)):
     owner=guard(authorization)
-    job=marketplace.get_job(req.job_id)
+    job=marketplace_for(owner).get_job(req.job_id)
     if not job:raise HTTPException(404,'Job not found')
     thread_id=f'{req.persona}:{req.job_id}:{uuid4().hex[:12]}'
     def events():
@@ -311,23 +357,27 @@ def stream_run(req:AnalyzeRequest,authorization:str|None=Header(None)):
             yield f'event: started\ndata: {json.dumps({"thread_id":thread_id})}\n\n'
             with jobs_lock:
                 for update in bid_graph.stream({'job':job,'persona':req.persona,'owner_id':owner,'revision':0},
-                        config={'configurable':{'thread_id':thread_id}},stream_mode='updates'):
+                        config={'configurable':{'thread_id':thread_id},'recursion_limit':int(CONFIG.get('max_steps',18))},stream_mode='updates'):
                     for node in update:
                         if node!='__interrupt__':
                             yield f'event: node\ndata: {json.dumps({"node":node})}\n\n'
             yield f'event: done\ndata: {json.dumps({"thread_id":thread_id,**get_run_state(thread_id)},default=str)}\n\n'
-        except Exception:
+        except Exception as exc:
+            registry.fail(thread_id,type(exc).__name__)
             yield 'event: error\ndata: {"detail":"Analysis interrupted. Marketplace or model unavailable; retry from the inbox."}\n\n'
     return StreamingResponse(events(),media_type='text/event-stream',
         headers={'Cache-Control':'no-cache','X-Accel-Buffering':'no'})
 
 def get_run_state(thread_id):
     snapshot=bid_graph.get_state({'configurable':{'thread_id':thread_id}})
+    failure=registry.failure(thread_id)
     if not snapshot.values:
+        if failure:return {'status':'needs_attention','failure_code':failure,'pending_approval':False,'interrupt_payload':[]}
         if registry.exists(thread_id):return {'status':'queued','pending_approval':False,'interrupt_payload':[]}
         raise HTTPException(404,'Run not found')
     values=dict(snapshot.values)
     values.setdefault('status','needs_attention')
+    if failure:values.update(status='needs_attention',failure_code=failure)
     values['pending_approval']=bool(snapshot.interrupts)
     values['interrupt_payload']=[i.value for i in snapshot.interrupts]
     return values
@@ -397,7 +447,7 @@ def run_events(thread_id:str,authorization:str|None=Header(None)):
 def start_conversation(req:MessageRequest,authorization:str|None=Header(None)):
     owner=guard(authorization);thread_id=f'conversation:{uuid4().hex}'
     registry.add(thread_id,'conversation',owner)
-    conversation_graph.invoke(req.model_dump(),config={'configurable':{'thread_id':thread_id}})
+    conversation_graph.invoke({**req.model_dump(),'owner_id':owner},config={'configurable':{'thread_id':thread_id}})
     return {'thread_id':thread_id,**conversation_state(thread_id)}
 
 def conversation_state(thread_id):
@@ -418,7 +468,8 @@ def approve_conversation(thread_id:str,req:ApprovalRequest,authorization:str|Non
 
 @app.get('/analytics')
 def analytics(authorization:str|None=Header(None)):
-    guard(authorization)
-    if not hasattr(marketplace,'db'):return {'message':'Available in local mode'}
-    rows=marketplace.db.execute('select kind,count(*) from writes group by kind').fetchall()
-    return {'actions':dict(rows),'connects_remaining':marketplace.get_connects_balance(),'source':'local synthetic simulator'}
+    owner=guard(authorization)
+    port=marketplace_for(owner)
+    if not hasattr(port,'db'):return {'message':'Available in local mode'}
+    rows=port.db.execute('select kind,count(*) from writes group by kind').fetchall()
+    return {'actions':dict(rows),'connects_remaining':port.get_connects_balance(),'source':'local synthetic simulator'}

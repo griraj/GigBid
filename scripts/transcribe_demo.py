@@ -7,7 +7,10 @@ The model is downloaded to the ignored tmp directory; voice stays local.
 import argparse
 import json
 import os
+import subprocess
 from pathlib import Path
+import numpy as np
+import imageio_ffmpeg
 
 ROOT = Path(__file__).resolve().parents[1]
 os.environ.setdefault('HF_HUB_DISABLE_XET', '1')
@@ -21,7 +24,12 @@ def main():
     args = parser.parse_args()
     model = WhisperModel('base.en', device='cpu', compute_type='int8',
                          download_root=str(ROOT / 'tmp/asr-models'))
-    segments, info = model.transcribe(str(args.audio), language='en',
+    # Decode with FFmpeg to avoid PyAV API differences between releases.
+    decoded = subprocess.run([imageio_ffmpeg.get_ffmpeg_exe(), '-v', 'error',
+        '-i', str(args.audio), '-ac', '1', '-ar', '16000', '-f', 'f32le', '-'],
+        check=True, capture_output=True).stdout
+    waveform = np.frombuffer(decoded, dtype=np.float32)
+    segments, info = model.transcribe(waveform, language='en',
         beam_size=5, word_timestamps=True, vad_filter=True,
         initial_prompt='GigBid freelance marketplace. LangGraph, MCP, portfolio evidence, '
         'Connects cost, idempotency keys, synthetic dataset, counteroffer.')

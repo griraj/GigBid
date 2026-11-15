@@ -9,6 +9,11 @@ an Arq/Postgres queue path, GitHub OAuth token encryption, document uploads,
 and a generated OpenAPI TypeScript client. See `docs/PHASE3_IMPLEMENTATION.md`
 for precise limitations and activation instructions.
 
+Phase 4 subsequently added per-user local marketplace ledgers, portfolio MCP
+search routing, conservative run-budget guards, scheduled scouting, and a
+LangGraph Store-backed memory implementation. Its verification and external
+dependencies are documented in `docs/PHASE4_IMPLEMENTATION.md`.
+
 ## Implemented in this worktree (not yet deployed)
 
 - An authenticated, read-only `GET /runs/{thread_id}/history` endpoint exposes

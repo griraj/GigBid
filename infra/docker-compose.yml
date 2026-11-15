@@ -22,6 +22,29 @@ services:
       test: [CMD, redis-cli, ping]
       interval: 5s
       retries: 10
+  ollama:
+    image: ollama/ollama:latest
+    profiles: [local-model]
+    restart: unless-stopped
+    volumes:
+      - ollama_data:/root/.ollama
+    expose:
+      - '11434'
+  portfolio_mcp:
+    restart: unless-stopped
+    build:
+      context: ..
+      dockerfile: infra/docker/Dockerfile.api
+    command: [uvicorn, mcp_servers.http:app, --host, '0.0.0.0', --port, '8001']
+    environment:
+      GIGBID_MCP_BEARER: ${GIGBID_MCP_BEARER:?Set a private MCP server token}
+      GIGBID_DATA_DIR: /app/local_data
+      GIGBID_MCP_ALLOWED_HOSTS: portfolio_mcp,portfolio_mcp:8001
+      GIGBID_MCP_ALLOWED_ORIGINS: http://portfolio_mcp:8001
+    volumes:
+      - local_data:/app/local_data
+    expose:
+      - '8001'
   api:
     restart: unless-stopped
     build:
@@ -33,7 +56,10 @@ services:
       GIGBID_API_TOKEN: ${GIGBID_API_TOKEN:?Set a private reviewer token}
       GIGBID_DATA_DIR: /app/local_data
       GIGBID_CHECKPOINT_DATABASE_URL: postgresql://gigbid:${GIGBID_POSTGRES_PASSWORD}@postgres:5432/gigbid
+      GIGBID_MEMORY_DATABASE_URL: postgresql://gigbid:${GIGBID_POSTGRES_PASSWORD}@postgres:5432/gigbid
       GIGBID_REDIS_URL: redis://redis:6379/0
+      GIGBID_OLLAMA_URL: http://ollama:11434
+      LANGGRAPH_STRICT_MSGPACK: 'true'
       GIGBID_AUTH_MODE: ${GIGBID_AUTH_MODE:-reviewer}
       GIGBID_SIGNUP_INVITE: ${GIGBID_SIGNUP_INVITE:-}
     volumes:
@@ -64,7 +90,10 @@ services:
       GIGBID_SIGNUP_INVITE: ${GIGBID_SIGNUP_INVITE:-}
       GIGBID_DATA_DIR: /app/local_data
       GIGBID_CHECKPOINT_DATABASE_URL: postgresql://gigbid:${GIGBID_POSTGRES_PASSWORD}@postgres:5432/gigbid
+      GIGBID_MEMORY_DATABASE_URL: postgresql://gigbid:${GIGBID_POSTGRES_PASSWORD}@postgres:5432/gigbid
       GIGBID_REDIS_URL: redis://redis:6379/0
+      GIGBID_OLLAMA_URL: http://ollama:11434
+      LANGGRAPH_STRICT_MSGPACK: 'true'
     volumes:
       - local_data:/app/local_data
     depends_on:
@@ -86,3 +115,4 @@ volumes:
   local_data:
   postgres_data:
   redis_data:
+  ollama_data:

@@ -4,13 +4,29 @@ from mcp.types import ToolAnnotations
 from data.synthetic import EVIDENCE
 from rag.retriever import EvidenceIndex
 from rag.ingest_portfolio import load_portfolio
+from data.portfolio_store import PortfolioStore
+from agent.paths import data_path
 import json
 import os
 from pathlib import Path
 
 mcp=FastMCP('GigBid Evidence Vault')
 READ=ToolAnnotations(readOnlyHint=True,destructiveHint=False,idempotentHint=True)
-items=EVIDENCE+load_portfolio()
+tenant_id=os.getenv('GIGBID_TENANT_ID','reviewer')
+multi=os.getenv('GIGBID_AUTH_MODE')=='multi'
+items=EVIDENCE+([] if multi else load_portfolio())
+
+def tenant_items(persona:str='ai')->list[dict]:
+    if not multi or tenant_id=='reviewer':return items
+    records=PortfolioStore(data_path('portfolio_uploads.sqlite')).list(tenant_id)
+    return items+[{'id':record['id'],'title':record['filename'],'text':record['text'],
+        'persona':persona,'type':'portfolio_document','skills':[],
+        'outcome':'unverified','source':'user_uploaded','date':record['created']} for record in records]
+
+def current_index(persona='ai'):
+    # Per-user uploads may arrive while a persistent MCP session is alive.
+    # Rebuild the small tenant index on demand to avoid stale search results.
+    return EvidenceIndex(tenant_items(persona)) if multi else index
 if os.getenv('GIGBID_RAG_BACKEND','lexical')=='ollama-vector':
     from rag.ollama_vector import build_ollama_index
     index=build_ollama_index(items)
@@ -24,19 +40,19 @@ else:index=EvidenceIndex(items)
 def search_evidence(requirement:str,k:int=5,persona:str='ai',filters:dict|None=None)->list[dict]:
     """Search attributable work samples for a requirement; optionally filter by type or outcome."""
     if not 1<=k<=20: raise ValueError('k must be 1-20')
-    hits=index.search(requirement,k=20,persona=persona)
+    hits=current_index(persona).search(requirement,k=20,persona=persona)
     filters=filters or {}
     return [h for h in hits if all(h.get(field)==value for field,value in filters.items())][:k]
 
 @mcp.tool(annotations=READ)
 def get_case_study(id:str)->dict:
     """Retrieve one full case study by its stable evidence ID."""
-    return next((e for e in items if e['id']==id and e['type'] in ('case_study','portfolio_document')), {})
+    return next((e for e in tenant_items() if e['id']==id and e['type'] in ('case_study','portfolio_document')), {})
 
 @mcp.tool(annotations=READ)
 def list_skills(persona:str='ai')->list[str]:
     """List skills demonstrated by this person's evidence."""
-    return sorted(set(skill for e in items if e['persona']==persona for skill in e['skills']))
+    return sorted(set(skill for e in tenant_items(persona) if e['persona']==persona for skill in e['skills']))
 
 @mcp.resource('portfolio://case/{id}')
 def case_resource(id:str)->str:return json.dumps(get_case_study(id))

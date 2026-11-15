@@ -47,16 +47,16 @@ def list_messages(job_id:JobId)->list[dict]:
 @mcp.tool(annotations=WRITE)
 def create_proposal_draft(job_id:JobId,text:ProposalText,idempotency_key:WriteKey,dry_run:bool=True,ctx:Context=None)->dict:
     """Create an unsent proposal draft after GigBid approval; preview by default."""
-    return port.create_proposal_draft(job_id,text,idempotency_key,dry_run,trace_id=request_trace(ctx))
+    return port.create_proposal_draft(job_id,text,idempotency_key,dry_run,trace_id=request_trace(ctx),actor=os.getenv('GIGBID_TENANT_ID','reviewer'))
 
 @mcp.tool(annotations=WRITE)
 def submit_proposal(job_id:JobId,text:ProposalText,idempotency_key:WriteKey,dry_run:bool=True,ctx:Context=None)->dict:
     """Spend Connects and submit only after human approval; preview by default."""
-    return port.submit_proposal(job_id,text,idempotency_key,dry_run,trace_id=request_trace(ctx))
+    return port.submit_proposal(job_id,text,idempotency_key,dry_run,trace_id=request_trace(ctx),actor=os.getenv('GIGBID_TENANT_ID','reviewer'))
 
 @mcp.tool(annotations=WRITE)
 def send_message(job_id:JobId,body:ProposalText,idempotency_key:WriteKey,dry_run:bool=True,ctx:Context=None)->dict:
     """Send a client message only after human approval; preview by default."""
-    return port.send_message(job_id,body,idempotency_key,dry_run,trace_id=request_trace(ctx))
+    return port.send_message(job_id,body,idempotency_key,dry_run,trace_id=request_trace(ctx),actor=os.getenv('GIGBID_TENANT_ID','reviewer'))
 
 if __name__=='__main__':mcp.run()

@@ -8,6 +8,7 @@ from rag.verify import verify
 import re
 import os
 from agent.mcp_client import MCPRouter
+from agent.marketplace_port import local_tenant_marketplace
 
 INJECTION=re.compile(r'(ignore (?:all|any|previous)|system\s*:|developer\s*:|override (?:safety|instructions))',re.I)
 FORBIDDEN=re.compile(r'(telegram|whatsapp|off.platform|outside (?:the )?platform|deposit|passport|credit card|free (?:production|sample)|unpaid (?:trial|sample))',re.I)
@@ -30,28 +31,40 @@ class BidState(TypedDict,total=False):
     approval:dict
     result:dict
     status:str
+    budget:dict
 
 def build_bid_graph(marketplace,index,config,checkpointer):
     tool_router=MCPRouter()
-    def marketplace_read(role,name,args):
+    def budget_gate(s):
+        job=s['job']
+        estimated=max(1,(len(job.get('title',''))+len(job.get('description',''))+len(' '.join(job.get('skills',[]))))//4)
+        ceiling=int(config.get('max_tokens',12000))
+        allowed=estimated<=ceiling
+        return {'budget':{'estimated_input_tokens':estimated,'max_tokens':ceiling,'allowed':allowed},
+                **({} if allowed else {'status':'needs_attention'})}
+    def budget_route(s):
+        return [Send(name,s) for name in ('analyst','risk','fit')] if s['budget']['allowed'] else END
+    def marketplace_read(role,name,args,owner_id='reviewer'):
         if os.getenv('GIGBID_TOOL_BACKEND','mcp')=='mcp':
-            return tool_router.call(role,'marketplace',name,args)
-        if name=='get_client_history':return marketplace.get_client_history(args['client_id'])
-        return getattr(marketplace,name)(**args)
-    def evidence_search(requirement,persona):
+            return tool_router.call(role,'marketplace',name,args,owner_id=owner_id)
+        port=local_tenant_marketplace(owner_id) if os.getenv('GIGBID_AUTH_MODE')=='multi' else marketplace
+        if name=='get_client_history':return port.get_client_history(args['client_id'])
+        return getattr(port,name)(**args)
+    def evidence_search(requirement,persona,owner_id='reviewer'):
         if os.getenv('GIGBID_TOOL_BACKEND','mcp')=='mcp':
-            return tool_router.call('fit','portfolio','search_evidence',{'requirement':requirement,'persona':persona,'k':5})
+            return tool_router.call('fit','portfolio','search_evidence',{'requirement':requirement,'persona':persona,'k':5},owner_id=owner_id)
         return index.search(requirement,k=5,variant=config.get('rag_variant','v2'),persona=persona)
-    def marketplace_write(name,job_id,text,key,dry_run):
+    def marketplace_write(name,job_id,text,key,dry_run,owner_id='reviewer'):
         if os.getenv('GIGBID_TOOL_BACKEND','mcp')=='mcp':
             field='text' if name!='send_message' else 'body'
-            return tool_router.call('approval','marketplace',name,{'job_id':job_id,field:text,'idempotency_key':key,'dry_run':dry_run})
-        return getattr(marketplace,name)(job_id,text,key,dry_run=dry_run)
+            return tool_router.call('approval','marketplace',name,{'job_id':job_id,field:text,'idempotency_key':key,'dry_run':dry_run},owner_id=owner_id)
+        port=local_tenant_marketplace(owner_id) if os.getenv('GIGBID_AUTH_MODE')=='multi' else marketplace
+        return getattr(port,name)(job_id,text,key,dry_run=dry_run)
     def analyst(s):
         j=s['job']; spec=JobSpec(job_id=j['id'],title=j['title'],requirements=j['skills'],deliverables=[j['title']],budget_min=j['min_budget'],budget_max=j['max_budget'])
         return {'spec':spec.model_dump()}
     def risk(s):
-        j=s['job'];c=marketplace_read('risk','get_client_history',{'client_id':j['client_id']}); flags=[]
+        j=s['job'];c=marketplace_read('risk','get_client_history',{'client_id':j['client_id']},s.get('owner_id','reviewer')); flags=[]
         if not c.get('payment_verified'):flags.append('unverified_payment')
         if FORBIDDEN.search(j['description']):flags.append('free_work_or_off_platform')
         if INJECTION.search(j['description']): flags.append('prompt_injection')
@@ -60,7 +73,7 @@ def build_bid_graph(marketplace,index,config,checkpointer):
     def fit(s):
         j=s['job']; found={}; evidence={}
         for req in j['skills']:
-            hits=[e for e in evidence_search(req,s['persona'])
+            hits=[e for e in evidence_search(req,s['persona'],s.get('owner_id','reviewer'))
                   if req.lower() in [v.lower() for v in e['skills']] or
                   (e.get('type')=='portfolio_document' and req.lower() in e['text'].lower())]
             found[req]=[e['id'] for e in hits]
@@ -78,7 +91,7 @@ def build_bid_graph(marketplace,index,config,checkpointer):
     def decision_route(s):return 'price' if s['decision']['action']=='bid' else END
     def price(s):
         j=s['job'];floor=config.get('hourly_floor',22)*max(1,min(20,len(j['skills'])*3))
-        connects_available=marketplace_read('pricing','get_connects_balance',{})
+        connects_available=marketplace_read('pricing','get_connects_balance',{},s.get('owner_id','reviewer'))
         suggested=max(j['min_budget'],min(j['max_budget'],round((j['min_budget']+j['max_budget'])/2)))
         return {'price':PriceQuote(amount=suggested,connects=j['connects'],rationale=f'Midpoint of stated budget; floor estimate ${floor:.0f}; marketplace balance {connects_available}, no guarantee of profit.').model_dump()}
     def write(s):
@@ -132,7 +145,7 @@ def build_bid_graph(marketplace,index,config,checkpointer):
         return {'compliance':ComplianceVerdict(allowed=not reasons,reasons=reasons).model_dump(),'status':'awaiting_approval' if not reasons else 'blocked'}
     def guard_route(s):return 'approval' if s['compliance']['allowed'] else END
     def approval(s):
-        preview=marketplace_write('submit_proposal',s['job']['id'],s['draft']['text'],'preview-only',True)
+        preview=marketplace_write('submit_proposal',s['job']['id'],s['draft']['text'],'preview-only',True,s.get('owner_id','reviewer'))
         choice=interrupt({'job_id':s['job']['id'],'draft':s['draft'],'evidence':s['evidence'],'risk':s['risk'],'price':s['price'],'preview':preview})
         if not isinstance(choice,dict) or choice.get('action')!='approve':return {'approval':choice or {'action':'reject'},'status':'rejected'}
         text=choice.get('text',s['draft']['text'])
@@ -143,11 +156,12 @@ def build_bid_graph(marketplace,index,config,checkpointer):
     def submit(s):
         from uuid import uuid5,NAMESPACE_URL
         key=str(uuid5(NAMESPACE_URL,'bid:'+s['job']['id']+':'+s['persona']))
-        result=marketplace_write('submit_proposal',s['job']['id'],s['approval']['text'],key,False)
+        result=marketplace_write('submit_proposal',s['job']['id'],s['approval']['text'],key,False,s.get('owner_id','reviewer'))
         return {'result':result,'status':'submitted'}
     graph=StateGraph(BidState)
-    for name,fn in [('analyst',analyst),('risk',risk),('fit',fit),('decide',decide),('price',price),('writer',write),('critic',critic),('revise',revise),('compliance',compliance),('approval',approval),('submit',submit)]:graph.add_node(name,fn)
-    graph.add_conditional_edges(START,lambda s:[Send(name,s) for name in ('analyst','risk','fit')],['analyst','risk','fit'])
+    for name,fn in [('budget_gate',budget_gate),('analyst',analyst),('risk',risk),('fit',fit),('decide',decide),('price',price),('writer',write),('critic',critic),('revise',revise),('compliance',compliance),('approval',approval),('submit',submit)]:graph.add_node(name,fn)
+    graph.add_edge(START,'budget_gate')
+    graph.add_conditional_edges('budget_gate',budget_route,['analyst','risk','fit',END])
     for node in ['analyst','risk','fit']:graph.add_edge(node,'decide')
     graph.add_conditional_edges('decide',decision_route)
     graph.add_edge('price','writer');graph.add_edge('writer','critic')

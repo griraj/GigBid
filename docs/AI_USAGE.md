@@ -20,3 +20,11 @@ TF-IDF is never described as neural embeddings. Local Ollama embeddings and
 model calls have their own measured results. Heuristic verifier rejections are
 not represented as calibrated truth labels. No external outcomes, public links,
 judge ratings, instructor policies or client hires were invented.
+
+
+The deployment performance pass measured the real hosted synthetic approval flow,
+reused official MCP sessions, added timeout-recovery and per-request trace tests,
+published the project article on the existing site, and packaged the source.
+A further error caught: an uncited experience claim in a model introduction
+escaped the original pattern. A regression test and actual open-profile rerun
+now show that introduction removed before approval.

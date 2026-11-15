@@ -13,6 +13,19 @@ submission. Read [current completion status](docs/COMPLETION_STATUS.md) for both
 implemented features and unfinished work. Missing instructor data, hosted
 services and public publications are never represented as completed.
 
+## Public demo and measured performance
+
+- App: https://gigbid-ti71.onrender.com/
+- Technical write-up: https://gigbid-ti71.onrender.com/writeup
+- Portfolio MCP: https://github.com/griraj/GigBid/tree/main/mcp_servers/portfolio
+
+The authenticated hosted synthetic check took about 68 seconds for analysis and
+11.75 seconds for approval before MCP session reuse. After deployment, the first
+observed analysis took 21.81 seconds and a repeat took 0.69 seconds; approval took
+0.36 seconds on the repeat. These are individual observations, not p95 estimates.
+See `evals/results/live_performance_*.json`. Free-service cold starts still apply.
+Start with [START_HERE.md](START_HERE.md) for recording and extraction instructions.
+
 ## Run on Windows
 
 Python 3.12 is the deployment target; this completion pass was tested with
@@ -117,7 +130,8 @@ workflow with explanatory captions; it creates no fictitious client outcomes.
 The current recording is silent and uses clearly identified synthetic data.
 
 - [Submission checklist](docs/SUBMISSION_CHECKLIST.md)
-- [Technical article draft](docs/TECHNICAL_WRITEUP.md)
+- [Current R&D report](docs/GigBid_RnD_Report.pdf)
+- [Published technical write-up](https://gigbid-ti71.onrender.com/writeup)
 - [Three-minute demo plan](docs/DEMO_SCRIPT.md)
 - [Installable Portfolio MCP](mcp_servers/portfolio/README.md)
 - [Deployment preparation](docs/DEPLOYMENT.md)
@@ -127,5 +141,6 @@ The report, recording and source bundle are generated beneath `output/`.
 The older `docs/GigBid_Engineering_Review.pdf` is historical and superseded.
 The Render blueprint uses the Free web service plan without a persistent disk.
 It sleeps when idle, and local data and pending approvals reset on service
-restart, redeploy or spin-down. Public app, demo, article and trace URLs must be verified
-before one final Classroom submission. The current deadline needs confirmation.
+restart, redeploy or spin-down. The public app, article and MCP source links are
+verified in evals/results/public_links.json. Record/upload the final demo and
+review the documented rubric gaps before one Classroom submission.

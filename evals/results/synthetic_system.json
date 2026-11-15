@@ -1,7 +1,7 @@
 {
   "metadata": {
     "source": "authored synthetic development fixtures and adversarial probes",
-    "timestamp": "2026-11-15T14:17:41.121048+00:00",
+    "timestamp": "2026-11-15T16:39:54.804399+00:00",
     "backend": "direct local port, template writer",
     "limitations": "Tiny authored set; no LLM judge, neural retrieval, or simulator reply/hire outcomes"
   },
@@ -17,8 +17,8 @@
     "f1": 1.0,
     "accuracy": 1.0
   },
-  "latency_p50_ms": 27.882899998076027,
-  "latency_p95_ms": 42.92771500022353,
+  "latency_p50_ms": 35.641349999423255,
+  "latency_p95_ms": 59.97556999827792,
   "jobs": [
     {
       "job_id": "j100",
@@ -28,7 +28,7 @@
       "expected_scam": false,
       "predicted_scam": false,
       "status": "awaiting_approval",
-      "latency_ms": 50.05410000012489,
+      "latency_ms": 70.25919999796315,
       "draft": {
         "text": "Hello, I can help with build churn prediction pipeline. I delivered semantic document search using python, embeddings, fastapi [e2]. I delivered retention modelling using python, scikit-learn, classification [e1]. I would confirm deliverables and milestones before starting. Would you be open to discussing the scope?",
         "claim_evidence": {
@@ -39,7 +39,8 @@
             "e1"
           ]
         },
-        "removed_claims": []
+        "removed_claims": [],
+        "model_usage": {}
       },
       "risk": {
         "score": 0.0,
@@ -55,7 +56,7 @@
       "expected_scam": false,
       "predicted_scam": false,
       "status": "awaiting_approval",
-      "latency_ms": 27.469099997688318,
+      "latency_ms": 36.124199999903794,
       "draft": {
         "text": "Hello, I can help with react dashboard for saas analytics. I delivered analytics admin using react, typescript, fastapi [e3]. My previous proposal discussed dashboard proposal [e6]. I would confirm deliverables and milestones before starting. Would you be open to discussing the scope?",
         "claim_evidence": {
@@ -66,7 +67,8 @@
             "e6"
           ]
         },
-        "removed_claims": []
+        "removed_claims": [],
+        "model_usage": {}
       },
       "risk": {
         "score": 0.0,
@@ -82,7 +84,7 @@
       "expected_scam": true,
       "predicted_scam": true,
       "status": "skip",
-      "latency_ms": 15.073099999426631,
+      "latency_ms": 18.94170000014128,
       "draft": {},
       "risk": {
         "score": 1.0,
@@ -102,7 +104,7 @@
       "expected_scam": false,
       "predicted_scam": false,
       "status": "awaiting_approval",
-      "latency_ms": 28.296699998463737,
+      "latency_ms": 35.968000000139,
       "draft": {
         "text": "Hello, I can help with sql reporting and data visualization. I delivered weekly reporting using sql, visualization [e5]. I delivered operations bi using python, sql, power bi [e4]. I would confirm deliverables and milestones before starting. Would you be open to discussing the scope?",
         "claim_evidence": {
@@ -113,7 +115,8 @@
             "e4"
           ]
         },
-        "removed_claims": []
+        "removed_claims": [],
+        "model_usage": {}
       },
       "risk": {
         "score": 0.0,
@@ -129,7 +132,7 @@
       "expected_scam": false,
       "predicted_scam": false,
       "status": "watch",
-      "latency_ms": 18.96860000124434,
+      "latency_ms": 26.958700000250246,
       "draft": {},
       "risk": {
         "score": 0.0,
@@ -145,7 +148,7 @@
       "expected_scam": false,
       "predicted_scam": false,
       "status": "awaiting_approval",
-      "latency_ms": 29.693000000406755,
+      "latency_ms": 35.31469999870751,
       "draft": {
         "text": "Hello, I can help with search engine for internal knowledge base. I delivered semantic document search using python, embeddings, fastapi [e2]. I delivered retention modelling using python, scikit-learn, classification [e1]. I would confirm deliverables and milestones before starting. Would you be open to discussing the scope?",
         "claim_evidence": {
@@ -156,7 +159,8 @@
             "e1"
           ]
         },
-        "removed_claims": []
+        "removed_claims": [],
+        "model_usage": {}
       },
       "risk": {
         "score": 0.0,
@@ -172,7 +176,7 @@
       "expected_scam": false,
       "predicted_scam": false,
       "status": "awaiting_approval",
-      "latency_ms": 28.57179999773507,
+      "latency_ms": 40.87739999886253,
       "draft": {
         "text": "Hello, I can help with data analyst needed for weekly sql reports. I delivered weekly reporting using sql, visualization [e5]. I delivered operations bi using python, sql, power bi [e4]. I would confirm deliverables and milestones before starting. Would you be open to discussing the scope?",
         "claim_evidence": {
@@ -183,7 +187,8 @@
             "e4"
           ]
         },
-        "removed_claims": []
+        "removed_claims": [],
+        "model_usage": {}
       },
       "risk": {
         "score": 0.0,
@@ -199,7 +204,7 @@
       "expected_scam": true,
       "predicted_scam": true,
       "status": "skip",
-      "latency_ms": 13.309000001754612,
+      "latency_ms": 19.85939999940456,
       "draft": {},
       "risk": {
         "score": 1.0,

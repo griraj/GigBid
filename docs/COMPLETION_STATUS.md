@@ -42,10 +42,22 @@ weights have not been executed by the new sqlite-vec backend.
 
 The actual instructor GigSim and verified API/credentials; complete labelled
 persona/dev corpora; real policy update; authorized Upwork/GitHub MCP sessions;
-independent judge/panel studies and simulator outcomes; hidden tests; a connected
-hosting account; public demo/article publication and verified public trace links.
-The configured GitHub origin exists, but a remote branch check alone does not
-prove that anonymous reviewers can access it or that local changes are pushed.
+independent judge/panel studies and simulator outcomes; hidden tests; final demo upload and verified hosted public trace links.
+The public GitHub repository, Render app, published project article and Portfolio
+MCP source installation page were verified without credentials. A live
+authenticated synthetic test verified the deployed session-reuse speedup.
 
 The original deadline is past and an extension is unconfirmed in the latest
 clarification. Confirm eligibility with the instructor. No commit is backdated.
+
+
+## Demo release verification
+
+The final performance change passed Python/contract tests and browser approval,
+editing, rejection, degraded-mode, recovery, interview and negotiation scenarios.
+Exact counts and timings are in the result files. Reused MCP sessions retain
+role allowlists and per-request audit trace IDs; timeout recovery and schema
+snapshots are covered by tests. No reviewer credential is bundled.
+
+The ZIP is demo-ready, not a claim of complete rubric compliance: the unfinished
+production items and independent studies listed above remain explicit.

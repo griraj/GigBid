@@ -1,47 +1,46 @@
-# Single-submission checklist
+# Final submission and recording checklist
 
-The original specification deadline is 12 November 2026, 11:59 PM PKT. The
-latest clarification says an extension is not confirmed. Confirm the applicable
-deadline directly with the instructor; do not backdate commits.
+## Prepared and verified
 
-## Prepared locally
+- Public app: https://gigbid-ti71.onrender.com/
+- Public repository: https://github.com/griraj/GigBid
+- Published article: https://gigbid-ti71.onrender.com/writeup
+- Portfolio MCP source/Docker installation: https://github.com/griraj/GigBid/tree/main/mcp_servers/portfolio
+- Actual authenticated hosted before/after performance checks, public-link checks,
+  Python tests and browser workflow tests are recorded in evals/results/.
+- The report is generated under output/pdf; the source and final demo archive
+  are generated under output/submission. Check the final page count and hashes.
+- START_HERE.md gives extraction instructions and a three-minute recording plan.
 
-- R&D PDF builder: `python scripts/build_report.py`; generated file under `output/pdf/`.
-- Source ZIP builder: `python scripts/package_submission.py`; archive and checksum under `output/submission/`.
-- Publication draft: `docs/TECHNICAL_WRITEUP.md` (verify the final word count).
-- Actual-screen recording plan: `docs/DEMO_SCRIPT.md`.
-- Installable Portfolio MCP instructions: `mcp_servers/portfolio/README.md`.
-- Render single-container blueprint, persistent paths and private token requirement.
-- Synthetic retrieval/system experiments and before/after safety probes.
-- Python, MCP contract and Playwright test definitions and local reports.
+## Your remaining submission steps
 
-## Must be completed and verified before submission
+1. Record your own final three-minute demonstration using START_HERE.md. Sign in
+   before recording and keep the private reviewer token out of the video.
+2. Upload the recording and verify that the instructor can open it while signed
+   out. Replace the null demo URL in submission.json with that real link.
+3. Review the report's measured findings and explicitly stated limitations.
+4. Submit the PDF and verified app, repository, demo, MCP and article links
+   together. Attach the ZIP if requested.
+5. Put the reviewer login token directly in a private GCR comment, never in the
+   repository, ZIP, public document, recording or public issue.
+6. Confirm the applicable deadline with the instructor. The supplied original
+   deadline was 12 November 2026 at 11:59 PM PKT; an extension is unconfirmed.
 
-- Deploy the complete backend/frontend, set a private reviewer token and confirm
-  persistence through a restart. Keep the service live until grades are released.
-- Push the reviewed final source to the public repository and verify it while
-  signed out. The configured remote is `https://github.com/griraj/GigBid`;
-  current public accessibility and inclusion of local edits are not assumed.
-- Record and upload the three-minute actual application demo; verify access.
-- Publish the article to your selected platform and record its public URL.
-- Verify that the public repository's Portfolio MCP Docker/source instructions
-  install from a clean checkout, or publish a package separately.
-- Obtain instructor resources and run the missing studies. Keep unperformed
-  measurements marked unavailable in the report.
-- Confirm the final report is at most ten pages and review its limitations.
-- Attach the PDF, all required verified links, and the ZIP if requested, together.
+## Limits that must remain explicit
 
-## Private Classroom comment
+Render Free sleeps when idle and resets SQLite data on restart, redeploy or
+spin-down. Refresh recovery within a running instance is verified; hosted
+restart durability is not supplied by this free storage configuration.
 
-Enter the real deployment login details directly in the private GCR comment.
-Do not put credentials into this document, the manifest, the ZIP, a video, the
-public repository or a public issue. For the current single-reviewer token UI,
-describe it as a reviewer access token rather than inventing an email/password.
+The operational instructor GigSim, full labelled dev/persona corpora and real
+2 November policy update were absent from the starter archive. Existing files
+are illustrative examples, not a verified running service. Do not invent its
+API responses, reply/hire rates or hidden-test results.
 
-## Missing instructor evidence
+Full multi-user tenancy, encrypted OAuth, Redis scheduling/worker infrastructure,
+Postgres Store memory, all required independent studies and hosted tracing
+remain documented in docs/COMPLETION_STATUS.md. A demo-ready archive is not a
+claim that these rubric requirements have been completed.
 
-The executable GigSim, verified contract/credentials, full labelled persona/dev
-corpora and real 2 November policy update were not provided. The starter's
-localhost URL and token are placeholders. Do not infer reply/hire rates from
-local submissions. The 40-task tool study, 50-job orchestration comparison,
-judge calibration, blind panel and hidden-test results remain outstanding.
+The included earlier scripted recording is a reference. Record the current
+application yourself and upload that final video.

@@ -117,6 +117,12 @@ approval from about 6.6 seconds to 0.06 seconds. Those local timings are not
 hosted results; the first call still pays process startup. The raw measurements
 are in `mcp_performance.json` and `live_performance_before.json`.
 
+After the change deployed, the first observed hosted analysis took 21.81 seconds.
+A repeat with warm tool sessions took 0.69 seconds; approval took 0.36 seconds.
+These individual observations are retained in `live_performance_after.json`
+and `live_performance_warm.json`, not presented as p95 estimates. Free-service
+spin-down still causes cold starts and loses local SQLite state.
+
 ## Persistence was a product feature hiding in deployment configuration
 
 Another issue appeared outside the agents. The original container mounted a

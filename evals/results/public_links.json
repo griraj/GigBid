@@ -1,5 +1,5 @@
 {
-  "checked_at": "2026-11-15T16:25:26.263199+00:00",
+  "checked_at": "2026-11-15T16:38:19.810199+00:00",
   "repository": {
     "url": "https://github.com/griraj/GigBid",
     "public": true
@@ -15,8 +15,21 @@
       "mode": "local",
       "rag_backend": "lexical",
       "tool_backend": "mcp",
-      "durable": true
+      "durable": false,
+      "storage_ephemeral": true,
+      "mcp_sessions": "persistent",
+      "revision": "0dcf6a11cfb663c34a83f29e07061b25b3cf2d37"
     }
+  },
+  "technical_writeup": {
+    "url": "https://gigbid-ti71.onrender.com/writeup",
+    "status": 200,
+    "article_present": true
+  },
+  "portfolio_mcp": {
+    "url": "https://github.com/griraj/GigBid/tree/main/mcp_servers/portfolio",
+    "readme_status": 200,
+    "distribution": "Public source and documented Docker installation, not PyPI"
   },
   "method": "Unauthenticated HTTP; no private reviewer credential stored"
 }

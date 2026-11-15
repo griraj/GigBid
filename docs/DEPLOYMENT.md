@@ -1,7 +1,9 @@
 # Deploy the single-container review build
 
 The repository includes `render.yaml` and `infra/docker/Dockerfile.deploy`.
-This is deployment preparation. No hosting resource or live URL has been created.
+The app is deployed at https://gigbid-ti71.onrender.com/ and its public
+write-up is at https://gigbid-ti71.onrender.com/writeup. Current verification
+and authenticated timing records live in evals/results/.
 The candidate uses a single reviewer token and synthetic local marketplace.
 
 ## Render
@@ -69,3 +71,17 @@ not a public trace from a hosted tracing product. LangGraph can use configured
 LangSmith tracing via its standard environment variables; authorise a real
 account, verify traces, review redaction and then publish the required links.
 Model/provider credentials must never enter these logs or public artifacts.
+
+
+## MCP performance fix
+
+The default `GIGBID_MCP_PERSISTENT=1` reuses an official ClientSession for
+each server instead of starting a subprocess for every call. Separate owner
+tasks keep each session's context lifetime valid. Timeouts do not replay writes.
+Trace IDs use per-call MCP metadata instead of a process-level cached value.
+Set the variable to `0` only to reproduce the fresh-session benchmark.
+The free deployment limits BLAS threads to avoid oversubscribing its CPU.
+
+Cold tool startup remains visible on the first analysis after a deploy or
+spin-down. Repeat actions reuse warm sessions. Do not compare the local
+benchmark numbers directly with hosted HTTP measurements.

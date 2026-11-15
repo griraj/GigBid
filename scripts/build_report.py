@@ -1,5 +1,6 @@
 """Generate an evidence-backed engineering review; missing studies stay explicit."""
 import json
+import shutil
 from pathlib import Path
 from xml.sax.saxutils import escape
 from reportlab.lib import colors
@@ -19,6 +20,8 @@ def build():
     before=json.loads((RESULTS/'synthetic_system_before.json').read_text())
     vectors=json.loads((RESULTS/'ollama_retrieval.json').read_text())
     models=json.loads((RESULTS/'open_model_comparison.json').read_text())
+    performance=json.loads((RESULTS/'mcp_performance.json').read_text())
+    live=json.loads((RESULTS/'live_performance_before.json').read_text())
     output=ROOT/'output/pdf/GigBid_RnD_Report.pdf'
     output.parent.mkdir(parents=True,exist_ok=True)
     styles=getSampleStyleSheet()
@@ -37,11 +40,11 @@ def build():
 
     page('GigBid | Engineering Design Review')
     p('AI-4016 Assignment II | 15 November 2026 | Development evidence edition')
-    p('<b>Scope.</b> This report records the implemented system and experiments actually executed. It is not evidence of full assignment compliance. The instructor GigSim executable, verified contract, gold development corpus, hidden test and 2 November policy update were unavailable. Public deployment, publication and live OAuth are not claimed.')
+    p('<b>Scope.</b> This report records the implemented system and experiments actually executed. It is not evidence of full assignment compliance. The instructor GigSim executable, verified contract, gold development corpus, hidden test and 2 November policy update were unavailable. The public repository and Render application were verified; official live marketplace OAuth and instructor outcomes are not claimed.')
     p('<b>Problem.</b> Freelancers need to identify relevant opportunities, avoid risky requests, ground proposals in demonstrated work, and control every submission. The approval boundary is a product requirement: proposals, messages and Connects spending require a human decision through LangGraph interrupts.')
     p('<b>Working implementation.</b> React/TypeScript connects to FastAPI; two handwritten LangGraph workflows use typed handoffs. The bid workflow runs analysis branches in parallel. Three official-SDK MCP servers expose portfolio, marketplace and workspace capabilities. Local marketplace writes use deterministic idempotency keys and an audit table. The default demo uses lexical retrieval and a template writer; separate actual Ollama writer and embedding experiments are included below.')
     p('<b>Data.</b> The available corpus has eight authored jobs, six evidence items and three personas. Only five jobs have nonempty positive evidence labels. All are synthetic. No Kaggle data or instructor labels are represented as used. Each experiment cites JSON under evals/results/.')
-    p('<b>Declared development targets.</b> Proposed acceptance targets are p95 below 120 seconds for model-backed analysis, zero unapproved sends, and no paid API calls in the local profile. These are targets, not verified production service levels. Model-backed and hidden-test latency remain unmeasured.')
+    p('<b>Declared development targets.</b> Proposed acceptance targets are p95 below 120 seconds for model-backed analysis, zero unapproved sends, and no paid API calls in the local profile. These are targets, not verified production service levels. Small model experiments and a live synthetic template flow are measured; the hidden test remains unavailable.')
 
     page('1 | Architecture and state discipline')
     p('<b>Bid graph.</b> Start -&gt; parallel Analyst / Risk / Fit -&gt; Decision -&gt; Pricing -&gt; Writer -&gt; Critic -&gt; Compliance -&gt; Approval interrupt -&gt; Submit. Skip and watch terminate early. Critique revisions are bounded by configuration. Approval edits are rechecked before writing. A configured hard-block flag prevents known injected or prohibited job content from proceeding to drafting.')
@@ -89,7 +92,7 @@ def build():
     for name,metrics in models['models'].items():rows.append([name,metrics['samples'],metrics['p95_latency_s'],metrics['generated_tokens']])
     table(rows,[170,60,115,150])
     p('<b>Writer comparison.</b> Both open models ran on five authored jobs with a maximum of 180 output tokens per call. Raw and cleaned drafts, actual generation/prompt token counts and completion reasons are retained in open_model_comparison.json. Earlier capped smoke outputs are separate. Local paid API cost was zero; hardware and electricity were not estimated.')
-    p('<b>Negative result.</b> The smaller writers frequently copied job/evidence text rather than producing a polished proposal; some outputs hit the token cap. Verifier rejections are heuristic observations, not calibrated unsupported-claim rates. Neither model is established as a quality winner. Larger-model evaluation, independent labels and a calibrated judge remain necessary.')
+    p('<b>Negative result and revision.</b> The original free-form small writers frequently copied job/evidence text; some outputs hit the token cap. Those measurements remain preserved. Writer v2 requests short structured fields and evidence IDs, then assembles factual sentences from those records. Uncited experience introductions are removed; incomplete or uncited model drafts are blocked. Verifier rejections are not calibrated truth labels. Neither model is established as a quality winner.')
 
     page('4 | Claim verification and R&D C')
     failed_before=sum(not item['correct'] for item in before['claim_probes'])
@@ -104,9 +107,27 @@ def build():
     page('5 | Change request, extension and deployment')
     p('<b>Instructor policy change.</b> The 2 November update was not supplied. No invented update, implementation time or before/after grade is reported. Existing prohibitions are used for development. block_risk_flags is configuration so known injection and prohibited-job flags can become hard stops without changing graph wiring.')
     p('<b>Signature extension X5.</b> The negotiation subgraph drafts rate-floor responses from explicit hourly offers and requires the parent conversation approval before sending. Below-floor offers produce a minimum-rate counteroffer and a walk-away condition; missing offers trigger clarification. This implements a local coaching mechanism. GigSim achieved-rate versus offered-rate evaluation remains unavailable and no client acceptance is claimed.')
-    p('<b>Deployment preparation.</b> The Compose demo uses an Nginx same-origin proxy, an API health check, a required private production token, a persistent data volume and restart policies. A separate multi-stage container serves the built frontend and API under one origin. render.yaml declares a persistent disk and generated reviewer token; it has not been deployed or verified on a hosting account.')
+    p('<b>Deployment.</b> The public app is https://gigbid-ti71.onrender.com/ and the public repository is https://github.com/griraj/GigBid. Verification is recorded in evals/results/public_links.json. Render Free uses no disk: SQLite state is lost on restart, redeploy or spin-down. The local Compose volume does not change that hosting limitation. A private reviewer token is required and excluded from this report and the source archive.')
     p('<b>Production limitations.</b> This release is a single-reviewer deployment candidate. It does not complete multi-user auth, encrypted OAuth, a Redis worker, distributed rate limiting, full-stack Postgres/vector/model Compose services, end-to-end hosted tracing or a 30-job GigSim CI gate. Do not expose private client data or describe the token gate as full account management.')
     p('<b>Browser verification.</b> Playwright scenarios cover reviewer entry, approval, rejection with a reason, edited approval, a simulated outage banner and reopening approval after refresh. The executed report is retained under apps/web/playwright-report and evals/results/playwright.json when available. Verify the final recorded status before submission.')
+
+    page('Performance correction | Real MCP transport')
+    p(f'<b>Observed hosted baseline.</b> An authorised synthetic job took {live["analysis_seconds"]:.2f} seconds to analyse and {live["approval_seconds"]:.2f} seconds to approve on the deployed app. The job list returned in {live["jobs_seconds"]:.2f} seconds. Node timestamps localised most delay to portfolio matching and repeated tool-process startup. Source: live_performance_before.json.')
+    p('<b>Change.</b> Graph calls now reuse one official MCP ClientSession per server. Dedicated owner tasks keep transport lifetimes valid, servers remain separate, and calls are serialised within each server. Per-request metadata preserves trace correlation. Permissions, dry-runs, human approval and deterministic write keys remain enforced. Timeouts never automatically replay writes; a later call can start a fresh session.')
+    rows=[['Local transport','Run','Analysis seconds','Approval seconds']]
+    for mode,label in [('fresh_sessions','Fresh'),('persistent_sessions','Reused')]:
+        for row in performance[mode]:rows.append([label,row['iteration'],f"{row['analysis_s']:.3f}",f"{row['approval_s']:.3f}"])
+    table(rows,[135,55,155,150])
+    p('<b>Protocol.</b> Both local configurations used identical synthetic jobs, a template writer and actual stdio MCP calls. API import time is excluded. The first reused run includes tool startup; the second uses warm sessions. Source: mcp_performance.json. These local values must not be substituted for hosted latency.')
+    after_path=RESULTS/'live_performance_after.json'
+    if after_path.exists():
+        after=json.loads(after_path.read_text())
+        p(f'<b>Hosted recheck.</b> After deployment, the same synthetic flow took {after["analysis_seconds"]:.2f} seconds to analyse and {after["approval_seconds"]:.2f} seconds to approve. Source: live_performance_after.json. A single run is not a p95 estimate; Render cold starts and shared CPU allocation still apply.')
+        warm_path=RESULTS/'live_performance_warm.json'
+        if warm_path.exists():
+            warm=json.loads(warm_path.read_text())
+            p(f'<b>Warm repeat.</b> The next observed hosted run took {warm["analysis_seconds"]:.2f} seconds for analysis and {warm["approval_seconds"]:.2f} seconds for approval. Source: live_performance_warm.json. Sessions were already initialised; this is not cold-start performance.')
+    else:p('<b>Hosted recheck.</b> The code passed local validation and was published to GitHub. A hosted after-measurement must be verified against the deployed revision before claiming the same speedup in production. Render Free cold starts remain outside this optimisation.')
 
     page('6 | Failure analysis: observed probes')
     p('These are ten executed adversarial development probes based on one synthetic job, not ten failed instructor dev jobs. The required ten-job failure taxonomy cannot be substituted with this list. Source: synthetic_system.json; the earlier behaviour is preserved in synthetic_system_before.json.')
@@ -120,7 +141,7 @@ def build():
     page('7 | Safety, reproducibility and submission status')
     p('<b>Never automate.</b> No scraping, browser-cookie marketplace access, unapproved send, fabricated portfolio achievement or fabricated client outcome. Imported real job exports remain research-only in local mode. Approval edits pass verification again; deterministic write keys protect retries. Remaining risks include lexical verification errors, subtle injections, single-user identity and unverified external route mappings.')
     p('<b>Reproduce.</b> Install the project with test dependencies and langgraph-checkpoint-sqlite. Run python -m pytest; python -m evals.runners.compare_retrieval; python -m evals.runners.evaluate_system; python -m evals.runners.check_gates. Build the web app and run npm run test:e2e. scripts/package_submission.py creates an allowlisted source ZIP with file hashes and excludes databases, environments, dependencies and generated private runtime state.')
-    p('<b>Required external evidence.</b> Real instructor dev evaluation and hidden test results; simulator reply/hire rates; the 40-task tool study; 50-job orchestration comparison; larger independent open-model comparison; calibrated judge and blind panel; the real policy update; public app, traces, demo and article; official third-party authorizations. Unknown values remain unavailable, never zero-filled.')
+    p('<b>Required external evidence.</b> Real instructor dev evaluation and hidden test results; simulator reply/hire rates; the 40-task tool study; 50-job orchestration comparison; larger independent open-model comparison; calibrated judge and blind panel; the real policy update; public traces and uploaded final demo; official third-party authorizations. Unknown values remain unavailable, never zero-filled.')
     p('<b>Submission.</b> Attach this PDF only after reviewing its limitations and replacing pending evidence where possible. Provide the verified live app URL, public repository URL, three-minute recording, installable Portfolio MCP and published article in one Classroom submission. Put reviewer credentials only in the private Classroom comment. Hosting must remain active until grades are released. The current deadline/extension needs confirmation with the instructor.')
     p('<b>References.</b> Primary source: supplied AI-4016 GigBid specification (16 PDF pages). Code evidence: agent/graphs/, agent/mcp_client.py, mcp_servers/, rag/, apps/api/, apps/web/. Experimental evidence: evals/results/synthetic_retrieval.json, synthetic_system_before.json and synthetic_system.json. Software primary references: github.com/modelcontextprotocol/python-sdk; docs.langchain.com/oss/python/langgraph/; fastapi.tiangolo.com; playwright.dev. Package versions are recorded in the environment lock file when regenerated.')
     def footer(canvas,doc):
@@ -129,6 +150,7 @@ def build():
         canvas.drawRightString(547,29,str(doc.page))
     SimpleDocTemplate(str(output),pagesize=(595.28,841.89),leftMargin=50,rightMargin=50,topMargin=48,bottomMargin=52,
         title='GigBid R&D Engineering Review').build(story,onFirstPage=footer,onLaterPages=footer)
+    shutil.copyfile(output,ROOT/'docs/GigBid_RnD_Report.pdf')
     print(output)
 
 

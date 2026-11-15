@@ -7,7 +7,7 @@ import shutil
 
 ROOT = Path(__file__).resolve().parents[1]
 DIRECTORIES = ('agent', 'apps', 'data', 'docs', 'evals', 'infra', 'mcp_servers', 'rag', 'tests', 'scripts', '.github')
-FILES = ('README.md', 'Makefile', 'pyproject.toml', '.env.example', '.gitignore', '.dockerignore', 'render.yaml', 'requirements-lock.txt', 'submission.json')
+FILES = ('README.md', 'START_HERE.md', 'Makefile', 'pyproject.toml', '.env.example', '.gitignore', '.dockerignore', 'render.yaml', 'requirements-lock.txt', 'submission.json')
 SKIP = {'node_modules', '__pycache__', 'dist', 'processed', '.pytest_cache', 'playwright-report', 'test-results'}
 
 
@@ -51,16 +51,19 @@ def package():
     for source,name in deliverables:
         if not source.is_file():raise FileNotFoundError(f'Required local deliverable missing: {source}')
         shutil.copyfile(source,output/name)
-    bundle=output/'GigBid_Submission_Bundle.zip'
+    bundle=output/'GigBid_Final.zip'
     with zipfile.ZipFile(bundle,'w',zipfile.ZIP_DEFLATED) as archive:
-        for path in [target]+[output/name for _,name in deliverables]:
-            info=zipfile.ZipInfo('GigBid_Submission/'+path.name,date_time=(1980,1,1,0,0,0))
+        with zipfile.ZipFile(target) as source_archive:
+            for entry in source_archive.infolist():
+                archive.writestr(entry,source_archive.read(entry.filename))
+        for path in [output/name for _,name in deliverables]:
+            info=zipfile.ZipInfo('GigBid/deliverables/'+path.name,date_time=(1980,1,1,0,0,0))
             info.compress_type=zipfile.ZIP_DEFLATED
             archive.writestr(info,path.read_bytes())
     (output/'SHA256SUMS.txt').write_text('\n'.join(
         f'{hashlib.sha256(path.read_bytes()).hexdigest()}  {path.name}'
         for path in [target,bundle]+[output/name for _,name in deliverables])+'\n',encoding='utf-8')
-    print(f'{bundle}; public links in submission.json remain explicitly unverified until published.')
+    print(f'{bundle}; read START_HERE.md and the explicit verification status in submission.json.')
 
 
 if __name__ == '__main__':

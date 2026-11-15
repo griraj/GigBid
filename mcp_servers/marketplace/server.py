@@ -16,7 +16,7 @@ ProposalText=Annotated[str,Field(min_length=10,max_length=10000)]
 
 def request_trace(ctx):
     if ctx is not None:
-        return getattr(ctx.request_context.meta,'trace_id','')
+        return getattr(ctx.request_context.meta,'trace_id','') or os.getenv('GIGBID_TRACE_ID','')
     return os.getenv('GIGBID_TRACE_ID','')
 
 @mcp.tool(annotations=READ)

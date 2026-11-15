@@ -7,24 +7,28 @@ The candidate uses a single reviewer token and synthetic local marketplace.
 ## Render
 
 1. Push the reviewed source to your own public GitHub repository.
-2. Sign in to Render and create a Blueprint from that repository. Review the
-   proposed paid service and disk before accepting resource creation. Do not
-   remove the disk and assume approvals remain durable.
+2. Sign in to Render and create a Blueprint from that repository. The Blueprint
+   selects the Free web service plan and does not attach a persistent disk.
 3. The Blueprint builds the frontend and Python API into one container. The API
    runs beneath `/api`; the frontend uses the same origin. The health endpoint
    is `/api/health` and SQLite files live beneath `/app/local_data`.
 4. Render generates `GIGBID_API_TOKEN`. Retrieve it privately from service
    settings and enter it in the app. Never copy it into Git, a video or the
    public submission manifest.
-5. Test an opportunity, leave a proposal awaiting approval, restart the service,
-   reopen Pipeline and approve. Check that only one local marketplace write is
-   recorded and Connects are deducted once.
-6. Record the real public URL only after these checks. Keep the service active
-   until grades are released and monitor `/api/health`.
+5. Test an opportunity and approve it during the same running session. Check
+   that only one local marketplace write is recorded and Connects are deducted
+   once. A browser refresh can reopen saved approvals while this instance runs;
+   restarting or spinning down the service resets its local state.
+6. Record the real public URL only after these checks. Allow for a cold start
+   when opening an idle service, and check availability before review.
 
-Render's filesystem is ephemeral without a disk, and persistent disks attach
-to paid services. The Blueprint therefore uses a paid plan. Check current
-pricing in your account before deploying.
+Free services spin down after 15 minutes without inbound traffic and take about
+a minute to wake up. SQLite databases, pending approvals, messages, memory and
+local traces are lost when the service restarts, redeploys or spins down. This
+free demo does not satisfy restart-durable approvals or continuously live
+deployment requirements. Persistent storage needs a separate storage integration
+or a paid service with a disk.
+[Free service limitations](https://render.com/docs/free),
 [Persistent disk documentation](https://render.com/docs/disks),
 [Docker deployment](https://render.com/docs/docker),
 [Blueprint specification](https://render.com/docs/blueprint-spec).

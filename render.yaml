@@ -1,17 +1,13 @@
-# Deployment blueprint. Review current provider pricing before creating resources.
-# A persistent disk requires a paid service; this file alone creates no resources.
+# Free review deployment. Local SQLite data is ephemeral and resets on restart.
+# Free services cannot attach a persistent disk; this file creates no resources.
 services:
   - type: web
     name: gigbid
     runtime: docker
     dockerfilePath: ./infra/docker/Dockerfile.deploy
     dockerContext: .
-    plan: starter
+    plan: free
     healthCheckPath: /api/health
-    disk:
-      name: gigbid-data
-      mountPath: /app/local_data
-      sizeGB: 1
     envVars:
       - key: GIGBID_ENV
         value: production

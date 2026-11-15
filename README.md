@@ -125,6 +125,7 @@ The current recording is silent and uses clearly identified synthetic data.
 
 The report, recording and source bundle are generated beneath `output/`.
 The older `docs/GigBid_Engineering_Review.pdf` is historical and superseded.
-The Render blueprint is prepared but not deployed; it needs an account and a
-paid persistent disk. Public app, demo, article and trace URLs must be verified
+The Render blueprint uses the Free web service plan without a persistent disk.
+It sleeps when idle, and local data and pending approvals reset on service
+restart, redeploy or spin-down. Public app, demo, article and trace URLs must be verified
 before one final Classroom submission. The current deadline needs confirmation.

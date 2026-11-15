@@ -11,7 +11,15 @@ Enter your reviewer token privately in the app. It is deliberately absent from
 this submission folder. Keep it out of the recording and use only the private Classroom
 comment to share it with the instructor.
 
-## Record your own three-minute video
+## Add your narration to the new demo
+
+The new `docs/demo/GigBid_Silent_Demo.mp4` is a real three-minute browser
+capture of the local application and backend using synthetic marketplace data.
+Read `docs/demo/GigBid_Narration_Script.md` while watching it, then supply your
+audio for synchronization. The video intentionally has no audio yet.
+Its source recording and measured scene timeline are in `docs/demo/`.
+
+## Record another take if needed
 
 1. Open the app, sign in before recording, and allow any Render cold start to
    finish. Use the AI persona from Settings.
@@ -32,7 +40,7 @@ comment to share it with the instructor.
 Use OBS, Windows screen recording, or another recorder. Upload the resulting
 video, check access while signed out, and add that URL to your final submission.
 `docs/demo/GigBid_Reference_Demo.webm` is an earlier scripted reference recording;
-record your own latest demonstration instead of presenting it as a new capture.
+the newly captured, narration-ready file is `docs/demo/GigBid_Silent_Demo.mp4`.
 
 ## Run this project locally
 
@@ -65,12 +73,14 @@ See README.md for real Ollama generation/embeddings and evaluation instructions.
 - `docs/test-reports/playwright/index.html`: readable browser test report.
 - `evals/results/`: recorded test, retrieval, model and performance evidence.
 - `docs/demo/GigBid_Reference_Demo.webm`: earlier scripted reference video.
+- `docs/demo/GigBid_Silent_Demo.mp4`: new capture, waiting for your narration.
+- `docs/demo/GigBid_Narration_Script.md`: easy spoken script with scene times.
 - `submission.json`: verified public links and the pending final demo URL.
 
 Runnable source, configuration and tests stay in their existing assignment
-folders. Git history is preserved. Installed dependencies, runtime databases,
-temporary outputs, obsolete drafts and ZIP archives have been removed.
-Reinstall local dependencies using the commands above before running locally.
+folders. Git history is preserved. Development dependencies and runtime
+outputs are ignored by Git; the recorder uses `tmp/`. No ZIP is generated.
+Use the commands above to restore dependencies when setting up a fresh copy.
 
 The actual GigSim service/dev labels, policy update, external OAuth authorizations
 and independent outcome studies are unavailable. Additional production gaps are

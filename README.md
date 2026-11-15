@@ -124,21 +124,26 @@ and reproducible commands. A verifier rejection is not an oracle truth label.
 
 From `apps/web`, run `npm.cmd run build`, `npx.cmd playwright install chromium`
 and `npm.cmd run test:e2e`. `npm.cmd run record:demo` records the real local
-workflow with explanatory captions; it creates no fictitious client outcomes.
-The current recording is silent and uses clearly identified synthetic data.
+workflow; it creates no fictitious client outcomes. The new recording is silent
+and uses clearly identified synthetic data. From the root, install
+`imageio-ffmpeg` and run `python scripts/export_demo.py` to export the captured
+WebM as MP4. Add narration and speech captions after recording your audio.
 
 - [Submission checklist](docs/SUBMISSION_CHECKLIST.md)
 - [Current R&D report](docs/GigBid_RnD_Report.pdf)
 - [Published technical write-up](https://gigbid-ti71.onrender.com/writeup)
 - [Three-minute demo plan](docs/DEMO_SCRIPT.md)
+- [Narration script for the new silent demo](docs/demo/GigBid_Narration_Script.md)
 - [Installable Portfolio MCP](mcp_servers/portfolio/README.md)
 - [Deployment preparation](docs/DEPLOYMENT.md)
 - [AI usage disclosure](docs/AI_USAGE.md)
 
 The submission files are kept directly in this project folder. The current
 report is `docs/GigBid_RnD_Report.pdf`, the browser report is
-`docs/test-reports/playwright/index.html`, and the earlier reference recording
-is `docs/demo/GigBid_Reference_Demo.webm`. Runtime databases and traces are
+`docs/test-reports/playwright/index.html`. The narration-ready video is
+`docs/demo/GigBid_Silent_Demo.mp4`; its original WebM and measured scene timeline
+are alongside it. The earlier reference recording remains separately named
+`docs/demo/GigBid_Reference_Demo.webm`. Runtime databases and traces are
 created in the ignored `local_data/` directory. No ZIP is generated.
 The Render blueprint uses the Free web service plan without a persistent disk.
 It sleeps when idle, and local data and pending approvals reset on service

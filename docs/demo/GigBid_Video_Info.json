@@ -1,0 +1,15 @@
+{
+  "file": "GigBid_Silent_Demo.mp4",
+  "duration_seconds": 180.0,
+  "bytes": 4109346,
+  "video": "H.264 / yuv420p",
+  "audio": "No audio stream; waiting for user narration",
+  "verification": "Entire exported video decoded successfully with -xerror",
+  "provenance": "Original Playwright capture; real application; synthetic data",
+  "edit": {
+    "source_in_seconds": 2.5,
+    "source_out_seconds": 182.5,
+    "speed": 1,
+    "reason": "Remove blank initialization and redundant closing hold"
+  }
+}

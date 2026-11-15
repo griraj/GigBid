@@ -1,5 +1,5 @@
 {
-  "status": "demo-ready-record-and-upload-final-video",
+  "status": "silent-demo-ready-add-narration-and-upload-final-video",
   "application": {
     "url": "https://gigbid-ti71.onrender.com/",
     "verified_public": true,
@@ -12,10 +12,10 @@
     "local_changes_pushed": false
   },
   "demo": {
-    "local_path": "docs/demo/GigBid_Reference_Demo.webm",
+    "local_path": "docs/demo/GigBid_Silent_Demo.mp4",
     "url": null,
     "verified_public": false,
-    "note": "Earlier scripted reference capture included; record and upload your own final demonstration."
+    "note": "New silent real-application capture using synthetic data. Add user narration, upload, and verify the public video link."
   },
   "portfolio_mcp": {
     "installation_readme": "mcp_servers/portfolio/README.md",

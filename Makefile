@@ -5,6 +5,7 @@ test:
 	python -m pytest -q
 eval:
 	python -m evals.runners.compare_retrieval
+	python -m evals.runners.evaluate_system
 seed:
 	python -c "from data.synthetic import JOBS,EVIDENCE; print(len(JOBS),'synthetic jobs;',len(EVIDENCE),'synthetic evidence items')"
 lint:

@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="880" viewBox="0 0 640 880">
+<rect width="100%" height="100%" fill="white"/>
+<defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8" fill="#8090a0"/></marker></defs>
+<path d="M 320 53 L 110 100" fill="none" stroke="#8090a0" stroke-width="1.4" marker-end="url(#arrow)" stroke-dasharray="4 3"/>
+<path d="M 320 53 L 530 100" fill="none" stroke="#8090a0" stroke-width="1.4" marker-end="url(#arrow)" stroke-dasharray="4 3"/>
+<path d="M 320 53 L 320 100" fill="none" stroke="#8090a0" stroke-width="1.4" marker-end="url(#arrow)" stroke-dasharray="4 3"/>
+<path d="M 110 138 L 320 190" fill="none" stroke="#8090a0" stroke-width="1.4" marker-end="url(#arrow)"/>
+<path d="M 530 138 L 320 190" fill="none" stroke="#8090a0" stroke-width="1.4" marker-end="url(#arrow)"/>
+<path d="M 320 138 L 320 190" fill="none" stroke="#8090a0" stroke-width="1.4" marker-end="url(#arrow)"/>
+<path d="M 250 210 C 12 210 12 840 250 840" fill="none" stroke="#8090a0" stroke-width="1.4" marker-end="url(#arrow)"/>
+<rect x="248" y="17" width="144" height="36" rx="6" fill="#eef3f7" stroke="#8090a0"/>
+<text x="320" y="39" text-anchor="middle" font-family="Arial,sans-serif" font-size="13" fill="#223149">start</text>
+<rect x="38" y="102" width="144" height="36" rx="6" fill="#eef3f7" stroke="#8090a0"/>
+<text x="110" y="124" text-anchor="middle" font-family="Arial,sans-serif" font-size="13" fill="#223149">analyst</text>
+<rect x="248" y="102" width="144" height="36" rx="6" fill="#eef3f7" stroke="#8090a0"/>
+<text x="320" y="124" text-anchor="middle" font-family="Arial,sans-serif" font-size="13" fill="#223149">risk</text>
+<rect x="458" y="102" width="144" height="36" rx="6" fill="#eef3f7" stroke="#8090a0"/>
+<text x="530" y="124" text-anchor="middle" font-family="Arial,sans-serif" font-size="13" fill="#223149">fit</text>
+<rect x="248" y="192" width="144" height="36" rx="6" fill="#eef3f7" stroke="#8090a0"/>
+<text x="320" y="214" text-anchor="middle" font-family="Arial,sans-serif" font-size="13" fill="#223149">decide</text>
+<rect x="248" y="282" width="144" height="36" rx="6" fill="#eef3f7" stroke="#8090a0"/>
+<text x="320" y="304" text-anchor="middle" font-family="Arial,sans-serif" font-size="13" fill="#223149">price</text>
+<rect x="248" y="372" width="144" height="36" rx="6" fill="#eef3f7" stroke="#8090a0"/>
+<text x="320" y="394" text-anchor="middle" font-family="Arial,sans-serif" font-size="13" fill="#223149">writer</text>
+<rect x="248" y="462" width="144" height="36" rx="6" fill="#eef3f7" stroke="#8090a0"/>
+<text x="320" y="484" text-anchor="middle" font-family="Arial,sans-serif" font-size="13" fill="#223149">critic</text>
+<rect x="458" y="462" width="144" height="36" rx="6" fill="#eef3f7" stroke="#8090a0"/>
+<text x="530" y="484" text-anchor="middle" font-family="Arial,sans-serif" font-size="13" fill="#223149">revise</text>
+<rect x="248" y="552" width="144" height="36" rx="6" fill="#eef3f7" stroke="#8090a0"/>
+<text x="320" y="574" text-anchor="middle" font-family="Arial,sans-serif" font-size="13" fill="#223149">compliance</text>
+<rect x="248" y="642" width="144" height="36" rx="6" fill="#eef3f7" stroke="#8090a0"/>
+<text x="320" y="664" text-anchor="middle" font-family="Arial,sans-serif" font-size="13" fill="#223149">approval</text>
+<rect x="248" y="732" width="144" height="36" rx="6" fill="#eef3f7" stroke="#8090a0"/>
+<text x="320" y="754" text-anchor="middle" font-family="Arial,sans-serif" font-size="13" fill="#223149">submit</text>
+<rect x="248" y="822" width="144" height="36" rx="6" fill="#eef3f7" stroke="#8090a0"/>
+<text x="320" y="844" text-anchor="middle" font-family="Arial,sans-serif" font-size="13" fill="#223149">end</text>
+</svg>

@@ -4,9 +4,10 @@ from mcp.types import ToolAnnotations
 from pydantic import Field
 from typing import Annotated
 from agent.marketplace_port import build_marketplace
+from agent.paths import marketplace_path
 
 mcp=FastMCP('GigBid Marketplace Gateway')
-port=build_marketplace(os.getenv('GIGBID_MODE','local'),os.getenv('GIGBID_DB_PATH','gigbid.sqlite'))
+port=build_marketplace(os.getenv('GIGBID_MODE','local'),marketplace_path())
 READ=ToolAnnotations(readOnlyHint=True,destructiveHint=False,idempotentHint=True)
 WRITE=ToolAnnotations(readOnlyHint=False,destructiveHint=True,idempotentHint=True)
 JobId=Annotated[str,Field(min_length=1,max_length=128)]
@@ -41,16 +42,16 @@ def list_messages(job_id:JobId)->list[dict]:
 @mcp.tool(annotations=WRITE)
 def create_proposal_draft(job_id:JobId,text:ProposalText,idempotency_key:WriteKey,dry_run:bool=True)->dict:
     """Create an unsent proposal draft after GigBid approval; preview by default."""
-    return port.create_proposal_draft(job_id,text,idempotency_key,dry_run)
+    return port.create_proposal_draft(job_id,text,idempotency_key,dry_run,trace_id=os.getenv('GIGBID_TRACE_ID',''))
 
 @mcp.tool(annotations=WRITE)
 def submit_proposal(job_id:JobId,text:ProposalText,idempotency_key:WriteKey,dry_run:bool=True)->dict:
     """Spend Connects and submit only after human approval; preview by default."""
-    return port.submit_proposal(job_id,text,idempotency_key,dry_run)
+    return port.submit_proposal(job_id,text,idempotency_key,dry_run,trace_id=os.getenv('GIGBID_TRACE_ID',''))
 
 @mcp.tool(annotations=WRITE)
 def send_message(job_id:JobId,body:ProposalText,idempotency_key:WriteKey,dry_run:bool=True)->dict:
     """Send a client message only after human approval; preview by default."""
-    return port.send_message(job_id,body,idempotency_key,dry_run)
+    return port.send_message(job_id,body,idempotency_key,dry_run,trace_id=os.getenv('GIGBID_TRACE_ID',''))
 
 if __name__=='__main__':mcp.run()

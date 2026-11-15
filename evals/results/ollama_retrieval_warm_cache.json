@@ -1,0 +1,101 @@
+{
+  "metadata": {
+    "timestamp": "2026-11-15T14:19:22.389634+00:00",
+    "source": "authored synthetic fixtures, not instructor dev data",
+    "embedding_model": "nomic-embed-text via local Ollama",
+    "vector_store": "SQLite with sqlite-vec cosine distance",
+    "limitations": "Five positive queries; V3 excluded because cross-encoder weights are not installed"
+  },
+  "variants": {
+    "v0": {
+      "precision_at_5": 0.7,
+      "recall_at_5": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_10": 1.0,
+      "p95_latency_ms": 2739.117,
+      "evaluated_queries": 5,
+      "by_persona": {
+        "ai": 1.0,
+        "analytics": 1.0,
+        "web": 1.0
+      },
+      "by_job_type": {
+        "AI / Data": 1.0,
+        "Analytics": 1.0,
+        "Web": 1.0
+      }
+    },
+    "v1": {
+      "precision_at_5": 0.7,
+      "recall_at_5": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_10": 1.0,
+      "p95_latency_ms": 18663.886,
+      "evaluated_queries": 5,
+      "by_persona": {
+        "ai": 1.0,
+        "analytics": 1.0,
+        "web": 1.0
+      },
+      "by_job_type": {
+        "AI / Data": 1.0,
+        "Analytics": 1.0,
+        "Web": 1.0
+      }
+    },
+    "v2": {
+      "precision_at_5": 0.7,
+      "recall_at_5": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_10": 1.0,
+      "p95_latency_ms": 6.383,
+      "evaluated_queries": 5,
+      "by_persona": {
+        "ai": 1.0,
+        "analytics": 1.0,
+        "web": 1.0
+      },
+      "by_job_type": {
+        "AI / Data": 1.0,
+        "Analytics": 1.0,
+        "Web": 1.0
+      }
+    },
+    "v4": {
+      "precision_at_5": 0.7,
+      "recall_at_5": 1.0,
+      "mrr": 0.9,
+      "ndcg_at_10": 0.9262,
+      "p95_latency_ms": 6.461,
+      "evaluated_queries": 5,
+      "by_persona": {
+        "ai": 1.0,
+        "analytics": 1.0,
+        "web": 1.0
+      },
+      "by_job_type": {
+        "AI / Data": 1.0,
+        "Analytics": 1.0,
+        "Web": 1.0
+      }
+    },
+    "v8": {
+      "precision_at_5": 0.7,
+      "recall_at_5": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_10": 1.0,
+      "p95_latency_ms": 2426.136,
+      "evaluated_queries": 5,
+      "by_persona": {
+        "ai": 1.0,
+        "analytics": 1.0,
+        "web": 1.0
+      },
+      "by_job_type": {
+        "AI / Data": 1.0,
+        "Analytics": 1.0,
+        "Web": 1.0
+      }
+    }
+  }
+}

@@ -1,3 +1,22 @@
 # AI usage disclosure
 
-OpenAI ChatGPT assisted with architecture, source code, integration tests, UI and documentation for this original implementation. The author must review all outputs and reproduce each result before submission. One important limitation caught during review: a sparse TF-IDF implementation cannot honestly be called neural dense retrieval; the benchmark and docs explicitly label it a CPU lexical fallback. No test results, judge ratings, client hires, traces or Kaggle ingestion have been invented.
+OpenAI ChatGPT/Codex assisted with architecture, source code, tests, UI and
+academic documentation. The author must review the source, reproduce the
+experiments and be able to explain and change the implementation in the viva.
+
+The completion pass changed shared persistence paths, Pipeline recovery,
+streaming, the MCP HTTP wrapper, conservative verification, negotiation,
+local tracing, SQLite vector storage, model/evaluation runners, browser tests,
+deployment preparation and submission builders. A scripted Playwright recording
+shows actual local interactions with clearly labelled synthetic data.
+
+A substantive error caught during review: a verifier accepted an unrelated
+achievement when it cited a valid evidence ID. The content gate was tightened;
+original and revised probes remain in the result files. Another review found
+that a mounted Docker volume did not cover every database write path. Shared
+path resolution now aligns the API and its MCP subprocesses.
+
+TF-IDF is never described as neural embeddings. Local Ollama embeddings and
+model calls have their own measured results. Heuristic verifier rejections are
+not represented as calibrated truth labels. No external outcomes, public links,
+judge ratings, instructor policies or client hires were invented.

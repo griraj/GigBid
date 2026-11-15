@@ -14,3 +14,10 @@ def test_claims_without_evidence_rejected():
     assert len(rejected)==1
     assert 'spaceship' not in clean
     assert 'retention' in clean
+
+
+def test_unrelated_claim_cannot_borrow_valid_citation():
+    draft=ProposalDraft(text='I built a lunar rover [e1]. I guarantee perfect accuracy.',claim_evidence={})
+    clean,rejected=verify(draft,[EVIDENCE[0]])
+    assert clean == ''
+    assert len(rejected)==2

@@ -1,3 +1,5 @@
+> Historical release notes. See [current completion status](COMPLETION_STATUS.md) and [evaluation evidence](EVALUATION.md) for the completion pass. Earlier statements about unexecuted models, streaming and saved approvals are superseded where documented.
+
 # Combined Priority 1 + Priority 2 release
 
 ## Verified in this release

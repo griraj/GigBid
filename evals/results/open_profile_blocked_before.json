@@ -1,0 +1,28 @@
+{
+  "source": "one synthetic local open-profile integration check, not a dev-set benchmark",
+  "status": "blocked",
+  "pending_approval": false,
+  "evidence_ids": [
+    "e1",
+    "e2"
+  ],
+  "draft": {
+    "text": " I can share a concise milestone plan once we agree on priorities. I can share a concise milestone plan once we agree on priorities.",
+    "claim_evidence": {},
+    "removed_claims": [
+      "- Trained Python scikit-learn logistic regression and random forest for churn classification; evaluated ROC AUC, F1, and class imbalance.",
+      "- Implemented embedding-based retrieval and evidence citations in a Python FastAPI service; evaluated retrieval Recall@5."
+    ],
+    "model_usage": {
+      "eval_count": 52,
+      "prompt_eval_count": 365,
+      "eval_duration": 512562000,
+      "total_duration": 4310538300,
+      "load_duration": 3187090600,
+      "done_reason": "stop"
+    }
+  },
+  "latency_s": 39.074026700000104,
+  "trace_id": "5541063b791849178d0ac4f54ce46258",
+  "approved": false
+}

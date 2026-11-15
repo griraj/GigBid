@@ -1,11 +1,14 @@
 FROM python:3.12-slim
 WORKDIR /app
 COPY pyproject.toml ./
-RUN pip install --no-cache-dir fastapi uvicorn pydantic langgraph langgraph-checkpoint-sqlite mcp langchain-mcp-adapters httpx numpy scikit-learn pyyaml
 COPY agent ./agent
 COPY apps ./apps
 COPY data ./data
 COPY rag ./rag
 COPY mcp_servers ./mcp_servers
+RUN pip install --no-cache-dir . langgraph-checkpoint-sqlite
+RUN useradd --create-home gigbid && mkdir -p /app/local_data && chown -R gigbid:gigbid /app
+ENV GIGBID_DATA_DIR=/app/local_data
+USER gigbid
 EXPOSE 8000
 CMD ["uvicorn","apps.api.main:app","--host","0.0.0.0","--port","8000"]

@@ -19,13 +19,20 @@ from data.synthetic import EVIDENCE
 from rag.ingest_portfolio import load_portfolio
 from rag.retriever import EvidenceIndex
 from agent.memory.store import MemoryStore
+from agent.paths import data_path,marketplace_path
+from agent.runs import RunRegistry
+import secrets
+from agent.tracing import trace_id,event
 import json
 
 ROOT=Path(__file__).resolve().parents[2]
 CONFIG=yaml.safe_load((ROOT/'agent/config.yaml').read_text())
-marketplace=build_marketplace(os.getenv('GIGBID_MODE','local'),os.getenv('GIGBID_DB_PATH',str(ROOT/'gigbid.sqlite')))
+marketplace=build_marketplace(os.getenv('GIGBID_MODE','local'),marketplace_path())
 portfolio_items=EVIDENCE+load_portfolio()
-if os.getenv('GIGBID_RAG_BACKEND','lexical')=='neural':
+if os.getenv('GIGBID_RAG_BACKEND','lexical')=='ollama-vector':
+    from rag.ollama_vector import build_ollama_index
+    index=build_ollama_index(portfolio_items)
+elif os.getenv('GIGBID_RAG_BACKEND','lexical')=='neural':
     from rag.neural import NeuralEvidenceIndex
     index=NeuralEvidenceIndex(portfolio_items,
           model_name=os.getenv('GIGBID_EMBEDDING_MODEL','sentence-transformers/all-MiniLM-L6-v2'),
@@ -39,22 +46,36 @@ if os.getenv('GIGBID_CHECKPOINT_DATABASE_URL'):
 else:
     try:
         from langgraph.checkpoint.sqlite import SqliteSaver
-        db=sqlite3.connect(str(ROOT/'checkpoints.sqlite'),check_same_thread=False)
+        db=sqlite3.connect(str(data_path('checkpoints.sqlite')),check_same_thread=False)
         checkpointer=SqliteSaver(db)
     except ImportError:
         checkpointer=MemorySaver()  # degraded: approval is not restart-durable
 bid_graph=build_bid_graph(marketplace,index,CONFIG,checkpointer)
 conversation_graph=build_conversation_graph(marketplace,checkpointer)
-memory=MemoryStore(ROOT/'memory.sqlite')
+memory=MemoryStore(data_path('memory.sqlite'))
+registry=RunRegistry(data_path('runs.sqlite'))
 jobs_lock=threading.Lock()
 run_personas={}
 
+if os.getenv('GIGBID_ENV')=='production' and os.getenv('GIGBID_API_TOKEN','') in ('','demo-reviewer-token','change-this-before-deploying'):
+    raise RuntimeError('Set a private GIGBID_API_TOKEN before starting production')
 app=FastAPI(title='GigBid API',version='0.1.0',description='Evidence-first approval-gated freelancer copilot')
-app.add_middleware(CORSMiddleware,allow_origins=['http://localhost:5173','http://localhost:3000'],allow_credentials=True,allow_methods=['*'],allow_headers=['*'])
+app.add_middleware(CORSMiddleware,allow_origins=[v.strip() for v in os.getenv('GIGBID_CORS_ORIGINS','http://localhost:5173,http://localhost:3000').split(',') if v.strip()],allow_credentials=True,allow_methods=['*'],allow_headers=['*'])
+
+@app.middleware('http')
+async def correlate_request(request,call_next):
+    identifier=uuid4().hex
+    reset=trace_id.set(identifier)
+    try:
+        response=await call_next(request)
+        response.headers['X-Trace-ID']=identifier
+        event('http',method=request.method,path=request.url.path,status=response.status_code)
+        return response
+    finally:trace_id.reset(reset)
 
 def guard(authorization:str|None):
     expected=os.getenv('GIGBID_API_TOKEN','demo-reviewer-token')
-    if authorization!=f'Bearer {expected}':raise HTTPException(401,'Invalid reviewer token')
+    if not secrets.compare_digest(authorization or '',f'Bearer {expected}'):raise HTTPException(401,'Invalid reviewer token')
 
 class AnalyzeRequest(BaseModel):
     job_id:str
@@ -93,15 +114,51 @@ def start_run(req:AnalyzeRequest,authorization:str|None=Header(None)):
     guard(authorization);j=marketplace.get_job(req.job_id)
     if not j:raise HTTPException(404,'Job not found')
     thread_id=f'{req.persona}:{req.job_id}:{uuid4().hex[:12]}'
+    registry.add(thread_id,'bid')
     with jobs_lock:
         run_personas[thread_id]=req.persona
         bid_graph.invoke({'job':j,'persona':req.persona,'revision':0},config={'configurable':{'thread_id':thread_id}})
     return {'thread_id':thread_id,**get_run_state(thread_id)}
 
+
+@app.get('/runs')
+def list_runs(authorization:str|None=Header(None)):
+    guard(authorization)
+    result=[]
+    for thread_id,created in registry.list('bid'):
+        try:result.append({'thread_id':thread_id,'created':created,**get_run_state(thread_id)})
+        except HTTPException as exc:
+            if exc.status_code!=404:raise
+    return result
+
+
+@app.post('/runs/stream')
+def stream_run(req:AnalyzeRequest,authorization:str|None=Header(None)):
+    guard(authorization)
+    job=marketplace.get_job(req.job_id)
+    if not job:raise HTTPException(404,'Job not found')
+    thread_id=f'{req.persona}:{req.job_id}:{uuid4().hex[:12]}'
+    def events():
+        try:
+            registry.add(thread_id,'bid')
+            yield f'event: started\ndata: {json.dumps({"thread_id":thread_id})}\n\n'
+            with jobs_lock:
+                for update in bid_graph.stream({'job':job,'persona':req.persona,'revision':0},
+                        config={'configurable':{'thread_id':thread_id}},stream_mode='updates'):
+                    for node in update:
+                        if node!='__interrupt__':
+                            yield f'event: node\ndata: {json.dumps({"node":node})}\n\n'
+            yield f'event: done\ndata: {json.dumps({"thread_id":thread_id,**get_run_state(thread_id)},default=str)}\n\n'
+        except Exception:
+            yield 'event: error\ndata: {"detail":"Analysis interrupted. Marketplace or model unavailable; retry from the inbox."}\n\n'
+    return StreamingResponse(events(),media_type='text/event-stream',
+        headers={'Cache-Control':'no-cache','X-Accel-Buffering':'no'})
+
 def get_run_state(thread_id):
     snapshot=bid_graph.get_state({'configurable':{'thread_id':thread_id}})
     if not snapshot.values:raise HTTPException(404,'Run not found')
     values=dict(snapshot.values)
+    values.setdefault('status','needs_attention')
     values['pending_approval']=bool(snapshot.interrupts)
     values['interrupt_payload']=[i.value for i in snapshot.interrupts]
     return values

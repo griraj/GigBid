@@ -1,0 +1,25 @@
+# Deployment blueprint. Review current provider pricing before creating resources.
+# A persistent disk requires a paid service; this file alone creates no resources.
+services:
+  - type: web
+    name: gigbid
+    runtime: docker
+    dockerfilePath: ./infra/docker/Dockerfile.deploy
+    dockerContext: .
+    plan: starter
+    healthCheckPath: /api/health
+    disk:
+      name: gigbid-data
+      mountPath: /app/local_data
+      sizeGB: 1
+    envVars:
+      - key: GIGBID_ENV
+        value: production
+      - key: GIGBID_MODE
+        value: local
+      - key: GIGBID_TOOL_BACKEND
+        value: mcp
+      - key: GIGBID_DATA_DIR
+        value: /app/local_data
+      - key: GIGBID_API_TOKEN
+        generateValue: true

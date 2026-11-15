@@ -1,0 +1,18 @@
+{
+  "status": "local-deliverables-prepared-publication-pending",
+  "application": {"url": null, "verified_public": false},
+  "repository": {"url": "https://github.com/griraj/GigBid", "verified_public": false, "local_changes_pushed": false},
+  "demo": {"local_path": "output/demo/GigBid_3min_Demo.webm", "url": null, "verified_public": false},
+  "portfolio_mcp": {"installation_readme": "mcp_servers/portfolio/README.md", "url": null, "verified_public": false},
+  "technical_writeup": {"local_path": "docs/TECHNICAL_WRITEUP.md", "url": null, "verified_public": false},
+  "report": {"local_path": "output/pdf/GigBid_RnD_Report.pdf"},
+  "reviewer_credentials": "Enter directly in a private GCR comment; never store them here.",
+  "deadline": {"original": "2026-11-12T23:59:00+05:00", "extension_confirmed": false},
+  "limitations": [
+    "Instructor GigSim service, verified contract and complete labelled dev corpus missing",
+    "Real 2 November policy update missing",
+    "Multi-user production, Redis worker and full prescribed infrastructure remain unfinished",
+    "Public hosting, article/video publication, third-party OAuth and public traces require account access",
+    "Local synthetic/model experiments are not instructor or real-client outcomes"
+  ]
+}

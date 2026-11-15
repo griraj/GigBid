@@ -5,4 +5,13 @@ __pycache__/
 node_modules/
 dist/
 .venv/
+.venv-*/
+output/
+tmp/
+*.egg-info/
+playwright-report/
+test-results/
+*.tsbuildinfo
+local_data/
+traces.jsonl
 data/processed/

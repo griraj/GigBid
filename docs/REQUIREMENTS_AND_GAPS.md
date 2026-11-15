@@ -1,3 +1,5 @@
+> Historical release notes. See [current completion status](COMPLETION_STATUS.md) and [evaluation evidence](EVALUATION.md) for the completion pass. Earlier statements about unexecuted models, streaming and saved approvals are superseded where documented.
+
 # Assignment interpretation and honest compliance ledger
 
 The **16-page AI-4016 Assignment II PDF** is the authority. The starter kit was inspected only to determine what was supplied; no starter source or layout was copied. Because the assignment itself prescribes `agent/`, `rag/`, `mcp_servers/`, `apps/`, `evals/`, etc., those public paths were retained.

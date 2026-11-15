@@ -3,7 +3,7 @@
     "source": "hand-labelled synthetic fixtures, NOT GigSim or Kaggle",
     "jobs": 8,
     "evidence_items": 6,
-    "timestamp": "2026-11-15T13:09:14.618861+00:00",
+    "timestamp": "2026-11-15T13:37:51.474638+00:00",
     "embedding": "TF-IDF lexical vectors (no neural model)",
     "limitations": "Small, authored corpus; not representative of real recall or model performance"
   },
@@ -12,73 +12,91 @@
       "recall_at_5": 1.0,
       "mrr": 1.0,
       "ndcg_at_10": 1.0,
-      "latency_p50_ms": 0.477,
-      "latency_p95_ms": 0.557,
+      "latency_p50_ms": 2.345,
+      "latency_p95_ms": 3.485,
       "recall_at_5_by_persona": {
         "ai": 1.0,
         "web": 1.0,
         "analytics": 1.0
-      }
+      },
+      "precision_at_5": 0.7,
+      "f1_at_5": 0.8,
+      "evaluated_queries": 5
     },
     "v1": {
       "recall_at_5": 1.0,
       "mrr": 1.0,
       "ndcg_at_10": 1.0,
-      "latency_p50_ms": 1.274,
-      "latency_p95_ms": 1.425,
+      "latency_p50_ms": 9.983,
+      "latency_p95_ms": 11.179,
       "recall_at_5_by_persona": {
         "ai": 1.0,
         "web": 1.0,
         "analytics": 1.0
-      }
+      },
+      "precision_at_5": 0.7,
+      "f1_at_5": 0.8,
+      "evaluated_queries": 5
     },
     "v2": {
       "recall_at_5": 1.0,
       "mrr": 1.0,
       "ndcg_at_10": 1.0,
-      "latency_p50_ms": 0.419,
-      "latency_p95_ms": 0.444,
+      "latency_p50_ms": 2.136,
+      "latency_p95_ms": 2.543,
       "recall_at_5_by_persona": {
         "ai": 1.0,
         "web": 1.0,
         "analytics": 1.0
-      }
+      },
+      "precision_at_5": 0.7,
+      "f1_at_5": 0.8,
+      "evaluated_queries": 5
     },
     "v3": {
       "recall_at_5": 1.0,
       "mrr": 1.0,
       "ndcg_at_10": 1.0,
-      "latency_p50_ms": 0.432,
-      "latency_p95_ms": 0.518,
+      "latency_p50_ms": 2.112,
+      "latency_p95_ms": 2.208,
       "recall_at_5_by_persona": {
         "ai": 1.0,
         "web": 1.0,
         "analytics": 1.0
-      }
+      },
+      "precision_at_5": 0.7,
+      "f1_at_5": 0.8,
+      "evaluated_queries": 5
     },
     "v4": {
       "recall_at_5": 1.0,
       "mrr": 0.9,
       "ndcg_at_10": 0.9262,
-      "latency_p50_ms": 0.423,
-      "latency_p95_ms": 0.441,
+      "latency_p50_ms": 2.198,
+      "latency_p95_ms": 2.759,
       "recall_at_5_by_persona": {
         "ai": 1.0,
         "web": 1.0,
         "analytics": 1.0
-      }
+      },
+      "precision_at_5": 0.7,
+      "f1_at_5": 0.8,
+      "evaluated_queries": 5
     },
     "v8": {
       "recall_at_5": 1.0,
       "mrr": 1.0,
       "ndcg_at_10": 1.0,
-      "latency_p50_ms": 2.246,
-      "latency_p95_ms": 405.225,
+      "latency_p50_ms": 12.297,
+      "latency_p95_ms": 2491.847,
       "recall_at_5_by_persona": {
         "ai": 1.0,
         "web": 1.0,
         "analytics": 1.0
-      }
+      },
+      "precision_at_5": 0.7,
+      "f1_at_5": 0.8,
+      "evaluated_queries": 5
     }
   }
 }

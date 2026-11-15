@@ -1,80 +1,130 @@
-# GigBid — evidence-first freelancer intelligence
+# GigBid - evidence-first freelancer intelligence
 
-An original, from-scratch Assignment II implementation with a React/TypeScript interface, FastAPI API, LangGraph bid/conversation state machines, approval interrupts, portfolio retrieval and three MCP servers. The default demonstration is completely local and uses **synthetic examples**.
+![Thirty seconds of the actual local synthetic workflow](docs/images/demo.gif)
 
-**Updated interface:** navigation now runs across the top in a sticky horizontal bar. The layout uses the full screen width and includes a **Compact view / Comfortable view** toggle beside the account controls; the selection is remembered on the device. Mobile navigation scrolls horizontally without covering the content.
+GigBid analyses freelance opportunities, maps requirements to portfolio evidence,
+drafts proposals and client replies, and pauses for reviewer approval before any
+send. React/TypeScript, FastAPI, handwritten LangGraph graphs and official MCP
+servers form one working application.
 
-**Priority 1 update:** authorized CSV ingestion, multi-source deduplication and provenance, PDF/Markdown portfolio ingestion, optional real SentenceTransformer embeddings with Chroma persistence, CPU cross-encoder reranking, configurable Ollama proposal writer, and independent-gold retrieval metrics are now available. These optional neural/model paths require installed weights and have **not** yet been benchmarked on real data. Follow [Priority 1 setup](docs/PRIORITY1_SETUP.md).
+**Current status:** tested local development build with real optional Ollama
+inference and embedding experiments. It is not a completed rubric-compliant
+submission. Read [current completion status](docs/COMPLETION_STATUS.md) for both
+implemented features and unfinished work. Missing instructor data, hosted
+services and public publications are never represented as completed.
 
-**Priority 2 update:** the bidding and conversation graphs now use actual official MCP ClientSession transports for risk, portfolio matching, pricing and approved writes (agent-scoped allowlists). LangGraph `Send` runs analysis branches in parallel; V8 retrieval is a bounded corrective LangGraph. SQLite style/outcome memory has explicit promotion rules and a Settings UI delete action. See [Combined Priority 1+2 release notes](docs/PRIORITY1_2_RELEASE.md) for what still needs external access and production integration.
+## Run on Windows
 
-> **Submission status: functional development build, not a full rubric-compliant submission.** The supplied archive contains no executable GigSim service or gold-labelled dev set. No Kaggle data, external Upwork account, local LLM, actual neural embeddings, cloud deployment, client hire outcomes or review panel were available during this build. See [requirements gap report](docs/REQUIREMENTS_AND_GAPS.md). Do not submit this as if those items had been completed.
+Python 3.12 is the deployment target; this completion pass was tested with
+Python 3.14 because the supplied 3.12 virtual environment pointed to a missing
+interpreter. Exact executed package versions are in
+[environment.json](evals/results/environment.json). Use Node 20 or newer.
 
-## Quick start
-
-Requirements: Python 3.11+, Node 20+. From the `gigbid` directory:
-
-```bash
-python -m pip install -e '.[test]' langgraph-checkpoint-sqlite
-make test
-make eval
-make dev
+```powershell
+python -m venv .venv-current
+.\.venv-current\Scripts\python.exe -m pip install -e ".[test,neural-lite,report]" langgraph-checkpoint-sqlite
+.\.venv-current\Scripts\python.exe -m uvicorn apps.api.main:app --host 127.0.0.1 --port 8000
 ```
 
 In another terminal:
 
-```bash
+```powershell
 cd apps/web
-npm install
-npm run dev
+npm.cmd ci
+npm.cmd run dev
 ```
 
-Open **http://localhost:5173**. Reviewer token: `demo-reviewer-token` (local development only). Set `GIGBID_API_TOKEN` before exposing the application. Use Settings to select AI, Web or Analytics persona; open Job inbox; analyze job `j100` to see an approval gate; edit, approve or reject. `j102` and `j107` demonstrate risk screening. The Messages screen exposes the separate conversation graph.
+Open http://localhost:5173. The local fixture uses `demo-reviewer-token`.
+Production refuses that token: set a private `GIGBID_API_TOKEN` and put the actual
+reviewer credential only in the private Classroom comment. Do not commit it.
 
-## Why these pieces exist
+Choose a persona in Settings, analyse a job in the inbox, inspect its evidence,
+and edit/approve/reject. Pipeline reopens saved approvals after refresh.
+Messages uses a separate approval graph, including interview slots from Workspace
+MCP and hourly negotiation drafts. All default marketplace records are synthetic.
 
-```mermaid
-flowchart TD
-  UI["React approval console"] --> API["FastAPI"]
-  API --> BID["LangGraph bid graph"]
-  API --> TALK["LangGraph conversation graph"]
-  BID --> PAR["Parallel analysis"]
-  PAR --> DEC["Decision and proposal"]
-  DEC --> HITL["Interrupt for approval"]
-  HITL --> PORT["Marketplace port"]
-  TALK --> HITL
-  PORT --> LOCAL["Local simulator or GigSim adapter"]
+## Real local open-model profile
+
+Start Ollama, download the explicit models, then enable the backends:
+
+```powershell
+.\.venv-current\Scripts\python.exe scripts/prepare_open_models.py
+$env:GIGBID_LLM_BACKEND='ollama'
+$env:GIGBID_RAG_BACKEND='ollama-vector'
+$env:GIGBID_MCP_TIMEOUT='120'
+.\.venv-current\Scripts\python.exe -m uvicorn apps.api.main:app --host 127.0.0.1 --port 8000
 ```
 
-Parallel analysis = structured Job Analyst, Risk Assessor and Fit Matcher. The bid graph has bounded critique and a claim verifier before pausing. Every send is guarded by a human approval; an edited draft is checked again. Marketplace writes carry deterministic idempotency keys, recorded in SQLite with an append-only audit table.
+The writer model is configured in `agent/config.yaml`; the small local profile
+is a runnable starting point, not a demonstrated best-quality choice. Router,
+risk and critic currently contain deterministic rules; their configured model
+names do not mean those nodes make LLM calls. Template/lexical mode remains
+available for a fast demonstration. `ollama-vector` uses real nomic embeddings
+and persistent sqlite-vec cosine search. Optional SentenceTransformer/Chroma
+and cross-encoder paths require `.[neural]` and their downloaded weights.
 
-## Measured retrieval baseline — synthetic fixtures only
+## Architecture
 
-Six comparison configurations are executable using `make eval`. Their numbers are written to [`evals/results/synthetic_retrieval.json`](evals/results/synthetic_retrieval.json) on every run. This is a deliberately tiny corpus (8 jobs, 6 evidence items) and not a neural embedding/RAG benchmark.
+![Executable bid graph](docs/images/bid_graph.svg)
 
-| Configuration | Recall@5 | MRR | nDCG@10 |
-|---|---:|---:|---:|
-| V0 TF-IDF | 1.00 | 1.00 | 1.00 |
-| V1 requirement decomposition | 1.00 | 1.00 | 1.00 |
-| V2 BM25 + TF-IDF RRF | 1.00 | 1.00 | 1.00 |
-| V3 lexical overlap rerank | 1.00 | 1.00 | 1.00 |
-| V4 outcome promotion | 1.00 | 0.90 | 0.9262 |
-| V8 corrective retrieval graph | 1.00 | 1.00 | 1.00 |
+![Executable conversation graph](docs/images/conversation_graph.svg)
 
-**Interpretation:** with so few eligible evidence items, Recall@5 saturates. Outcome boosting hurt ranking quality. V2 is the current configurable default; it is not justified as the best neural RAG variant by this fixture alone.
+`python -m scripts.render_graphs` exports these from the actual graph objects.
+Analyst, Risk and Fit use parallel `Send` branches. The bid graph has bounded
+critique, content verification, compliance and an approval interrupt. The
+conversation graph has its own interrupt. Agent-scoped MCP allowlists restrict
+tool access; marketplace writes use deterministic idempotency keys and audit rows.
 
-## Code map
+Job state, execution traces and promoted memory are separate. Shared persistent
+paths make API and MCP subprocesses use the same marketplace database. The
+SQLite run index restores discoverability after refresh. PostgresSaver is
+optional; Postgres Store memory and multi-user tenancy are still unfinished.
 
-- `agent/graphs/`: two distinct StateGraph workflows and actual approval interrupts.
-- `agent/marketplace_port.py`: local simulated port and unverified external GigSim REST adapter; Upwork is safely unavailable until OAuth is implemented.
-- `agent/schemas.py`: Pydantic agent handoffs.
-- `rag/`: reproducible lexical retrieval variants and conservative claim checks.
-- `mcp_servers/`: Portfolio, Marketplace and Workspace official Python MCP SDK servers; start with `python -m mcp_servers.portfolio.server`, etc.
-- `data/synthetic.py`: all offline demo fixtures, including independently authored mini evaluation labels.
-- `apps/api/` and `apps/web/`: backend routes and professional responsive frontend.
-- `evals/`: comparison runner and generated measured results.
-- `tests/`: unit, integration and MCP contract smoke tests.
+## Executed evidence
 
-## Safety, scope, and academic honesty
+- [Lexical retrieval comparison](evals/results/synthetic_retrieval.json): the
+  authored micro-corpus saturates Recall@5; outcome weighting reduces ranking
+  quality. These results do not establish neural superiority.
+- [Real Ollama embedding experiment](evals/results/ollama_retrieval.json): inspect
+  the declared cache policy, query count and per-persona breakdown.
+- [Open-model comparison](evals/results/open_model_comparison.json) and
+  [limited smoke run](evals/results/open_model_smoke.json): raw outputs, measured
+  latency, tokens and truncation status; no calibrated quality or client outcomes.
+- [System and adversarial probes](evals/results/synthetic_system.json), with
+  [original failures](evals/results/synthetic_system_before.json) preserved.
+- [Python test report](evals/results/tests.xml) and
+  [Playwright results](evals/results/playwright.json). These are executed local
+  checks; CI definitions are not a claim that remote CI has already passed.
 
-No Upwork scraping, account automation, external sends or invented client outcomes occur. Offline jobs and projects are synthetic. The GigSim adapter's endpoint mapping must be checked against the actual instructor simulator before connecting it. Neural model calls are **optional and unverified on real data**; multi-user identity isolation is not implemented, and a password-like demo token is not production authentication. Review [`docs/REQUIREMENTS_AND_GAPS.md`](docs/REQUIREMENTS_AND_GAPS.md) before grading. Live URLs, public traces, demo GIF, recorded video, third-party MCP connection and published MCP package are not claimed.
+No reply/hire rates, calibrated judge scores or hidden-test results are invented.
+See [evaluation instructions](docs/EVALUATION.md) for supplied dev-label formats
+and reproducible commands. A verifier rejection is not an oracle truth label.
+
+## Validate and prepare submission
+
+```powershell
+.\.venv-current\Scripts\python.exe -m pytest -q
+.\.venv-current\Scripts\python.exe -m evals.runners.compare_retrieval
+.\.venv-current\Scripts\python.exe -m evals.runners.evaluate_system
+.\.venv-current\Scripts\python.exe -m evals.runners.check_gates
+.\.venv-current\Scripts\python.exe scripts/build_report.py
+.\.venv-current\Scripts\python.exe scripts/package_submission.py
+```
+
+From `apps/web`, run `npm.cmd run build`, `npx.cmd playwright install chromium`
+and `npm.cmd run test:e2e`. `npm.cmd run record:demo` records the real local
+workflow with explanatory captions; it creates no fictitious client outcomes.
+The current recording is silent and uses clearly identified synthetic data.
+
+- [Submission checklist](docs/SUBMISSION_CHECKLIST.md)
+- [Technical article draft](docs/TECHNICAL_WRITEUP.md)
+- [Three-minute demo plan](docs/DEMO_SCRIPT.md)
+- [Installable Portfolio MCP](mcp_servers/portfolio/README.md)
+- [Deployment preparation](docs/DEPLOYMENT.md)
+- [AI usage disclosure](docs/AI_USAGE.md)
+
+The report, recording and source bundle are generated beneath `output/`.
+The older `docs/GigBid_Engineering_Review.pdf` is historical and superseded.
+The Render blueprint is prepared but not deployed; it needs an account and a
+paid persistent disk. Public app, demo, article and trace URLs must be verified
+before one final Classroom submission. The current deadline needs confirmation.

@@ -11,7 +11,10 @@ from pathlib import Path
 mcp=FastMCP('GigBid Evidence Vault')
 READ=ToolAnnotations(readOnlyHint=True,destructiveHint=False,idempotentHint=True)
 items=EVIDENCE+load_portfolio()
-if os.getenv('GIGBID_RAG_BACKEND','lexical')=='neural':
+if os.getenv('GIGBID_RAG_BACKEND','lexical')=='ollama-vector':
+    from rag.ollama_vector import build_ollama_index
+    index=build_ollama_index(items)
+elif os.getenv('GIGBID_RAG_BACKEND','lexical')=='neural':
     from rag.neural import NeuralEvidenceIndex
     index=NeuralEvidenceIndex(items,model_name=os.getenv('GIGBID_EMBEDDING_MODEL','sentence-transformers/all-MiniLM-L6-v2'),
                               directory=str(Path(__file__).resolve().parents[2]/'data/processed/chroma'))

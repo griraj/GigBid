@@ -1,0 +1,66 @@
+import {test,expect} from '@playwright/test';
+import path from 'node:path';
+
+test('record actual local synthetic workflow',async({page})=>{
+  const started=Date.now();
+  const caption=async(text:string)=>{
+    await page.evaluate(text=>{
+      let banner=document.getElementById('demo-caption');
+      if(!banner){banner=document.createElement('div');banner.id='demo-caption';document.body.appendChild(banner)}
+      banner.style.cssText='position:fixed;bottom:16px;left:50%;transform:translateX(-50%);z-index:99999;max-width:1050px;background:#19283d;color:white;padding:16px 28px;border-radius:8px;font:18px/1.4 Arial;text-align:center';
+      banner.textContent=text;
+    },text);
+  };
+  await page.goto('/');
+  await page.getByLabel('Reviewer token').fill('demo-reviewer-token');
+  await page.getByRole('button',{name:/Enter workspace/}).click();
+  await expect(page.getByRole('navigation',{name:'Main navigation'})).toBeVisible();
+  await caption('GigBid: evidence-backed opportunities, with approval before every send. Scripted local demo using synthetic data.');
+  await page.waitForTimeout(9000);
+  await page.screenshot({path:'../../docs/images/overview.png',fullPage:true});
+  await page.getByRole('button',{name:/Job inbox/}).click();
+  await caption('Choose a job. Analyst, risk screening and portfolio matching run through the graph.');
+  await page.waitForTimeout(5000);
+  await page.getByRole('button').filter({has:page.getByRole('heading',{name:'Build churn prediction pipeline',exact:true})}).click();
+  await expect(page.getByRole('button',{name:/Approve/}).first()).toBeVisible();
+  await caption('The proposal is paused for approval. Review its evidence, risk assessment and proposed cost.');
+  await page.screenshot({path:'../../docs/images/proposal.png',fullPage:true});
+  await page.waitForTimeout(11000);
+  const editor=page.getByRole('textbox',{name:/proposal/i});
+  await editor.fill(await editor.inputValue()+' I would confirm the delivery schedule first.');
+  await caption('Edit the draft. Edited claims are checked again before the approved write.');
+  await page.waitForTimeout(7000);
+  await page.getByRole('button',{name:/Approve/}).first().click();
+  await expect(page.getByText('submitted',{exact:true}).first()).toBeVisible();
+  await caption('Submitted to the local simulator. Deterministic write keys protect retries from duplicate spending.');
+  await page.waitForTimeout(7000);
+  await page.getByRole('button',{name:/Job inbox/}).click();
+  await page.getByRole('button').filter({has:page.getByRole('heading',{name:'Unpaid sample work outside platform',exact:true})}).click();
+  await expect(page.getByText(/^skip$/i).first()).toBeVisible();
+  await caption('Scam example: free production work, deposit requests and off-platform contact trigger a skip.');
+  await page.waitForTimeout(9000);
+  await page.getByRole('button',{name:/Job inbox/}).click();
+  await page.getByRole('button').filter({has:page.getByRole('heading',{name:'Urgent banking verification task',exact:true})}).click();
+  await expect(page.getByText(/^skip$/i).first()).toBeVisible();
+  await caption('The planted SYSTEM instruction is untrusted job content. Known injection flags force skip.');
+  await page.waitForTimeout(9000);
+  await page.getByRole('button',{name:'Messages',exact:true}).click();
+  await page.getByLabel('Incoming client message').fill('Can we schedule an interview next week?');
+  await page.getByRole('button',{name:'Draft response',exact:true}).click();
+  await expect(page.getByRole('button',{name:'Approve response',exact:true})).toBeVisible();
+  await caption('A simulated client reply follows a separate conversation graph and approval boundary.');
+  await page.waitForTimeout(8000);
+  await page.getByRole('button',{name:'Approve response',exact:true}).click();
+  await expect(page.getByText('sent',{exact:true})).toBeVisible();
+  await page.getByLabel('Incoming client message').fill('Our hourly rate is $15 per hour. Can you accept that rate?');
+  await page.getByRole('button',{name:'Draft response',exact:true}).click();
+  await expect(page.getByText(/My minimum hourly rate/)).toBeVisible();
+  await caption('Negotiation coaching respects the configured rate floor. This counteroffer is still only a draft.');
+  await page.waitForTimeout(8000);
+  await page.getByRole('button',{name:'Pipeline',exact:true}).click();
+  await caption('Pipeline reopens saved approvals after refresh. Actual GigSim outcomes, public hosting and independent evaluations remain pending.');
+  await page.waitForTimeout(Math.max(0,180_000-(Date.now()-started)));
+  const video=page.video();
+  await page.close();
+  if(video)await video.saveAs(path.resolve('../../output/demo/GigBid_3min_Demo.webm'));
+});

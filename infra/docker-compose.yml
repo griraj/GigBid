@@ -1,22 +1,32 @@
 services:
   api:
+    restart: unless-stopped
     build:
       context: ..
       dockerfile: infra/docker/Dockerfile.api
     environment:
       GIGBID_MODE: local
-      GIGBID_API_TOKEN: ${GIGBID_API_TOKEN:-demo-reviewer-token}
+      GIGBID_ENV: production
+      GIGBID_API_TOKEN: ${GIGBID_API_TOKEN:?Set a private reviewer token}
+      GIGBID_DATA_DIR: /app/local_data
     volumes:
       - local_data:/app/local_data
-    ports:
-      - '8000:8000'
+    expose:
+      - '8000'
+    healthcheck:
+      test: [CMD, python, -c, "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
   web:
+    restart: unless-stopped
     build:
       context: ..
       dockerfile: infra/docker/Dockerfile.web
     ports:
       - '5173:80'
     depends_on:
-      - api
+      api:
+        condition: service_healthy
 volumes:
   local_data:

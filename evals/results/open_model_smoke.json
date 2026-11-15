@@ -1,0 +1,60 @@
+{
+  "metadata": {
+    "created_at": "2026-11-15T14:16:10.598083+00:00",
+    "corpus": "evals\\datasets\\synthetic_writer.jsonl",
+    "max_output_tokens": 24,
+    "limitations": "Small synthetic writer smoke comparison; capped outputs may be incomplete proposals. Verifier rejection is not a calibrated unsupported-claim label. No reply/hire rates."
+  },
+  "models": {
+    "qwen2.5:0.5b": {
+      "samples": 1,
+      "p50_latency_s": 3.486,
+      "p95_latency_s": 3.486,
+      "verifier_rejections_per_proposal": 0,
+      "characters_retained_ratio": 1.0,
+      "api_cost_usd": 0,
+      "model_provider": "local Ollama; hardware cost not included",
+      "generated_tokens": 24,
+      "rows": [
+        {
+          "latency_s": 3.485853099999076,
+          "removed_claims": 0,
+          "before_chars": 128,
+          "after_chars": 128,
+          "job_id": "j100",
+          "raw": "---\n\n**Job Title:** Build churn prediction pipeline\n\n**Description:** Need Python, scikit-learn classification with reproducible",
+          "cleaned": "---\n\n**Job Title:** Build churn prediction pipeline\n\n**Description:** Need Python, scikit-learn classification with reproducible",
+          "done_reason": "length",
+          "tokens": 24,
+          "prompt_tokens": 357,
+          "tokens_per_second": 149.37356461340252
+        }
+      ]
+    },
+    "qwen3:0.6b": {
+      "samples": 1,
+      "p50_latency_s": 120.872,
+      "p95_latency_s": 120.872,
+      "verifier_rejections_per_proposal": 0,
+      "characters_retained_ratio": 1.0,
+      "api_cost_usd": 0,
+      "model_provider": "local Ollama; hardware cost not included",
+      "generated_tokens": 24,
+      "rows": [
+        {
+          "latency_s": 120.8717921000025,
+          "removed_claims": 0,
+          "before_chars": 115,
+          "after_chars": 115,
+          "job_id": "j100",
+          "raw": "- Trained Python scikit-learn logistic regression and random forest for churn classification; evaluated ROC AUC, F1",
+          "cleaned": "- Trained Python scikit-learn logistic regression and random forest for churn classification; evaluated ROC AUC, F1",
+          "done_reason": "length",
+          "tokens": 24,
+          "prompt_tokens": 365,
+          "tokens_per_second": 0.8134940494774539
+        }
+      ]
+    }
+  }
+}

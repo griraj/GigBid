@@ -1,3 +1,5 @@
+> Historical release notes. See [current completion status](COMPLETION_STATUS.md) and [evaluation evidence](EVALUATION.md) for the completion pass. Earlier statements about unexecuted models, streaming and saved approvals are superseded where documented.
+
 # Priority 1 — Data, real embeddings, RAG, and open-model proposal writing
 
 This release extends the previous GigBid. **Synthetic mode still works without downloads.**

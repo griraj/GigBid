@@ -7,12 +7,13 @@ hourly_floor: 22
 max_critic_revisions: 2
 max_steps: 18
 max_tokens: 12000
+block_risk_flags: [prompt_injection, free_work_or_off_platform]
 models:
   open:
-    router: qwen3:4b
-    writer: qwen3:4b
-    critic: qwen3:4b
-    embedding: tfidf-cpu-fallback
+    router: qwen3:0.6b
+    writer: qwen3:0.6b
+    critic: qwen3:0.6b
+    embedding: nomic-embed-text
   paid:
     router: qwen3:4b
     writer: qwen3:4b

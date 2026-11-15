@@ -35,6 +35,7 @@ def build_bid_graph(marketplace,index,config,checkpointer):
     def marketplace_read(role,name,args):
         if os.getenv('GIGBID_TOOL_BACKEND','mcp')=='mcp':
             return tool_router.call(role,'marketplace',name,args)
+        if name=='get_client_history':return marketplace.get_client_history(args['client_id'])
         return getattr(marketplace,name)(**args)
     def evidence_search(requirement,persona):
         if os.getenv('GIGBID_TOOL_BACKEND','mcp')=='mcp':
@@ -67,7 +68,8 @@ def build_bid_graph(marketplace,index,config,checkpointer):
         score=(len(j['skills'])-len(missing))/max(len(j['skills']),1)
         return {'fit':FitReport(score=score,matched=found,missing=missing).model_dump(),'evidence':list(evidence.values())}
     def decide(s):
-        r=s['risk'];f=s['fit']; action='skip' if r['score']>=0.55 else 'bid' if f['score']>=config.get('minimum_fit',0.3) else 'watch'
+        r=s['risk'];f=s['fit']; hard_block=bool(set(r['flags'])&set(config.get('block_risk_flags',['prompt_injection','free_work_or_off_platform'])))
+        action='skip' if hard_block or r['score']>=0.55 else 'bid' if f['score']>=config.get('minimum_fit',0.3) else 'watch'
         if s['job'].get('provenance',{}).get('kind')=='real_export' and action=='bid':action='watch'
         reason='High risk' if action=='skip' else 'Portfolio evidence supports requirements' if action=='bid' else 'Insufficient demonstrated fit'
         if s['job'].get('provenance',{}).get('kind')=='real_export':reason='Research-only imported job: analysis is allowed, but submission is disabled in local mode.'
@@ -83,25 +85,36 @@ def build_bid_graph(marketplace,index,config,checkpointer):
         lines=[f"Hello, I can help with {j['title'].lower()}."]
         mapping={}
         for e in ev[:3]:
-            if e.get('outcome')=='unverified':
+            if e.get('type')=='proposal':
+                sentence=f"My previous proposal discussed {e['title'].lower()} [{e['id']}]."
+            elif e.get('outcome')=='unverified':
                 sentence=f"My uploaded portfolio document discusses {e['title'].lower()} [{e['id']}]."
             else:
                 sentence=f"I delivered {e['title'].lower()} using {', '.join(e['skills'][:3])} [{e['id']}]."
             lines.append(sentence);mapping[sentence]=[e['id']]
         lines.append('I would confirm deliverables and milestones before starting. Would you be open to discussing the scope?')
         proposed=' '.join(lines)
+        model_usage={}
         import os
         if os.getenv('GIGBID_LLM_BACKEND','template')=='ollama':
-            from agent.llm import draft_with_ollama
+            from agent.llm import draft_details_with_ollama
             model=config['models'][os.getenv('GIGBID_MODEL_PROFILE','open')]['writer']
-            proposed=draft_with_ollama(j,ev,model)
+            model_result=draft_details_with_ollama(j,ev,model)
+            proposed=model_result['text']
+            model_usage={key:value for key,value in model_result.items() if key not in ('text','raw_response')}
+            mapping={sentence:re.findall(r'\[([a-z][a-z0-9_-]{1,40})\]',sentence)
+                for sentence in re.split(r'(?<=[.!?])\s+',proposed.strip())
+                if re.search(r'\[[a-z][a-z0-9_-]{1,40}\]',sentence)}
         proposal=ProposalDraft(text=proposed,claim_evidence=mapping)
         verified,rejected=verify(proposal,ev)
-        return {'draft':{'text':verified,'claim_evidence':mapping,'removed_claims':rejected}}
+        return {'draft':{'text':verified,'claim_evidence':mapping,'removed_claims':rejected,'model_usage':model_usage}}
     def critic(s):
         text=s['draft']['text'];reasons=[]
         if len(text)<90:reasons.append('Draft is too brief')
         if not s.get('evidence'):reasons.append('No portfolio evidence available')
+        usage=s['draft'].get('model_usage',{})
+        if usage.get('done_reason')=='length':reasons.append('Model output was truncated; increase its budget or choose another model')
+        if usage and not re.search(r'\[[a-z][a-z0-9_-]{1,40}\]',text):reasons.append('Model draft has no usable evidence citations')
         return {'critique':Critique(pass_review=not reasons,reasons=reasons).model_dump()}
     def critic_route(s):
         if not s['critique']['pass_review'] and s.get('revision',0)<config.get('max_critic_revisions',2):return 'revise'
@@ -111,6 +124,7 @@ def build_bid_graph(marketplace,index,config,checkpointer):
         return {'revision':s.get('revision',0)+1,'draft':draft}
     def compliance(s):
         content=s['draft']['text'];reasons=[]
+        if not s['critique']['pass_review']:reasons.extend(s['critique']['reasons'])
         if CONTACT.search(content) or FORBIDDEN.search(content):reasons.append('Contact or prohibited arrangement detected')
         _,invalid=verify(ProposalDraft(**{k:s['draft'][k] for k in ('text','claim_evidence')}),s.get('evidence',[]))
         if invalid: reasons.append('Unsupported claims')

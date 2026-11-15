@@ -1,0 +1,164 @@
+{
+  "metadata": {
+    "created_at": "2026-11-15T14:31:37.654044+00:00",
+    "corpus": "evals\\datasets\\synthetic_writer.jsonl",
+    "max_output_tokens": 180,
+    "limitations": "Small synthetic writer smoke comparison; capped outputs may be incomplete proposals. Verifier rejection is not a calibrated unsupported-claim label. No reply/hire rates."
+  },
+  "models": {
+    "qwen2.5:0.5b": {
+      "samples": 5,
+      "p50_latency_s": 4.004,
+      "p95_latency_s": 9.081,
+      "verifier_rejections_per_proposal": 0.4,
+      "characters_retained_ratio": 0.935,
+      "api_cost_usd": 0,
+      "model_provider": "local Ollama; hardware cost not included",
+      "generated_tokens": 900,
+      "rows": [
+        {
+          "latency_s": 10.332445500000176,
+          "removed_claims": 2,
+          "before_chars": 957,
+          "after_chars": 667,
+          "job_id": "j100",
+          "raw": "---\n\n**Job Description: Build Churn Prediction Pipeline**\n\n**Title:** Build Churn Prediction Pipeline\n\n**Description:** We need a Python-based scikit-learn classification pipeline with reproducible evaluation and ROC AUC. The pipeline should include a class imbalance classifier.\n\n**Skills:** Python, scikit-learn, classification\n\n**Outcome:** We have successfully built a churn prediction pipeline using Python and scikit-learn. The pipeline includes a class imbalance classifier and evaluated its performance using ROC AUC and F1 score.\n\n**Portfolio Evidence:**\n\n[Portfolio Document]\n\n---\n\n**Job Description: Semantic Document Search**\n\n**Title:** Semantic Document Search\n\n**Description:** Trained Python scikit-learn logistic regression and random forest for semantic document search; evaluated retrieval Recall@5.\n\n**Skills:** Python, scikit-learn, classification\n\n**Outcome:** We have successfully trained a logistic regression and random forest model",
+          "cleaned": "---\n\n**Job Description: Build Churn Prediction Pipeline**\n\n**Title:** Build Churn Prediction Pipeline\n\n**Description:** We need a Python-based scikit-learn classification pipeline with reproducible evaluation and ROC AUC. The pipeline should include a class imbalance classifier. The pipeline includes a class imbalance classifier and evaluated its performance using ROC AUC and F1 score. **Portfolio Evidence:**\n\n[Portfolio Document]\n\n---\n\n**Job Description: Semantic Document Search**\n\n**Title:** Semantic Document Search\n\n**Description:** Trained Python scikit-learn logistic regression and random forest for semantic document search; evaluated retrieval Recall@5.",
+          "done_reason": "length",
+          "tokens": 180,
+          "prompt_tokens": 357,
+          "tokens_per_second": 179.42243916831717
+        },
+        {
+          "latency_s": 4.004223899999488,
+          "removed_claims": 0,
+          "before_chars": 959,
+          "after_chars": 955,
+          "job_id": "j101",
+          "raw": "---\n\n**React Dashboard for SaaS Analytics**\n\n**Project Description:**\nCreate a responsive React TypeScript analytics dashboard, charts, and accessible UI. The dashboard should be connected to a FastAPI backend for seamless data access.\n\n**Project Deliverables:**\n- A responsive React TypeScript dashboard with keyboard-accessible forms and charts.\n- A FastAPI backend for data access.\n- A user-friendly interface for data visualization.\n\n**Project Deliverables:**\n- A responsive React TypeScript dashboard with keyboard-accessible forms and charts.\n- A FastAPI backend for data access.\n- A user-friendly interface for data visualization.\n\n**Project Deliverables:**\n- A responsive React TypeScript dashboard with keyboard-accessible forms and charts.\n- A FastAPI backend for data access.\n- A user-friendly interface for data visualization.\n\n**Project Deliverables:**\n- A responsive React TypeScript dashboard with keyboard-accessible forms and charts.\n- A Fast",
+          "cleaned": "---\n\n**React Dashboard for SaaS Analytics**\n\n**Project Description:**\nCreate a responsive React TypeScript analytics dashboard, charts, and accessible UI. The dashboard should be connected to a FastAPI backend for seamless data access. **Project Deliverables:**\n- A responsive React TypeScript dashboard with keyboard-accessible forms and charts. - A FastAPI backend for data access. - A user-friendly interface for data visualization. **Project Deliverables:**\n- A responsive React TypeScript dashboard with keyboard-accessible forms and charts. - A FastAPI backend for data access. - A user-friendly interface for data visualization. **Project Deliverables:**\n- A responsive React TypeScript dashboard with keyboard-accessible forms and charts. - A FastAPI backend for data access. - A user-friendly interface for data visualization. **Project Deliverables:**\n- A responsive React TypeScript dashboard with keyboard-accessible forms and charts. - A Fast",
+          "done_reason": "length",
+          "tokens": 180,
+          "prompt_tokens": 334,
+          "tokens_per_second": 161.42715958150904
+        },
+        {
+          "latency_s": 4.077446399998735,
+          "removed_claims": 0,
+          "before_chars": 759,
+          "after_chars": 758,
+          "job_id": "j103",
+          "raw": "---\n\n**GigBid Proposal**\n\n**Title:** SQL Reporting and Data Visualization\n\n**Description:** Clean CSV exports, write SQL reporting queries, build a Power BI dashboard, and explain key performance indicators (KPIs).\n\n**Skills:** SQL, Power BI, Data Cleaning\n\n**Experience:** [e1]\n\n---\n\n**Portfolio Evidence:**\n\n[Portfolio Document]\n\n---\n\n**Deliverables:**\n\n- Cleaned and cleaned-up CSV files\n- SQL reporting queries\n- Power BI dashboard\n- Explanation of KPIs\n\n---\n\n**Outcome:** [e2]\n\n---\n\n**Portfolio Evidence:**\n\n[Portfolio Document]\n\n---\n\n**Deliverables:**\n\n- Power BI dashboard\n- Explanation of KPIs\n\n---\n\n**Outcome:** [e3]\n\n---\n\n**Portfolio Evidence:**\n\n[Portfolio Document]\n\n---\n\n**Deliverables:**\n\n- SQL reports\n- Clear visualization\n- Explanation of KPI",
+          "cleaned": "---\n\n**GigBid Proposal**\n\n**Title:** SQL Reporting and Data Visualization\n\n**Description:** Clean CSV exports, write SQL reporting queries, build a Power BI dashboard, and explain key performance indicators (KPIs). **Skills:** SQL, Power BI, Data Cleaning\n\n**Experience:** [e1]\n\n---\n\n**Portfolio Evidence:**\n\n[Portfolio Document]\n\n---\n\n**Deliverables:**\n\n- Cleaned and cleaned-up CSV files\n- SQL reporting queries\n- Power BI dashboard\n- Explanation of KPIs\n\n---\n\n**Outcome:** [e2]\n\n---\n\n**Portfolio Evidence:**\n\n[Portfolio Document]\n\n---\n\n**Deliverables:**\n\n- Power BI dashboard\n- Explanation of KPIs\n\n---\n\n**Outcome:** [e3]\n\n---\n\n**Portfolio Evidence:**\n\n[Portfolio Document]\n\n---\n\n**Deliverables:**\n\n- SQL reports\n- Clear visualization\n- Explanation of KPI",
+          "done_reason": "length",
+          "tokens": 180,
+          "prompt_tokens": 329,
+          "tokens_per_second": 175.37056792333047
+        },
+        {
+          "latency_s": 3.767302899999777,
+          "removed_claims": 0,
+          "before_chars": 890,
+          "after_chars": 885,
+          "job_id": "j105",
+          "raw": "---\n\n**Proposal for GigBid**\n\n**Title:** Search engine for internal knowledge base\n\n**Description:** Build Python semantic search with embeddings, retrieval evaluation and citation-backed answers using FastAPI.\n\n**Skills:** Python, embeddings, FastAPI\n\n**Experience:** [e1]\n\n**Portfolio Evidence:**\n\n- [e1]: Semantic document search\n  - Implemented embedding-based retrieval and evidence citations in a Python FastAPI service, evaluated retrieval Recall@5.\n  - Outcome: Delivered\n\n- [e2]: Retention modelling\n  - Trained Python scikit-learn logistic regression and random forest for churn classification; evaluated ROC AUC, F1 and class imbalance.\n  - Outcome: Delivered\n\n---\n\n**Personalized Proposal:**\n\n---\n\n**Title:** Search engine for internal knowledge base\n\n**Description:** Build Python semantic search with embeddings, retrieval evaluation and citation-backed answers using FastAPI.",
+          "cleaned": "---\n\n**Proposal for GigBid**\n\n**Title:** Search engine for internal knowledge base\n\n**Description:** Build Python semantic search with embeddings, retrieval evaluation and citation-backed answers using FastAPI. **Skills:** Python, embeddings, FastAPI\n\n**Experience:** [e1]\n\n**Portfolio Evidence:**\n\n- [e1]: Semantic document search\n  - Implemented embedding-based retrieval and evidence citations in a Python FastAPI service, evaluated retrieval Recall@5. - Outcome: Delivered\n\n- [e2]: Retention modelling\n  - Trained Python scikit-learn logistic regression and random forest for churn classification; evaluated ROC AUC, F1 and class imbalance. - Outcome: Delivered\n\n---\n\n**Personalized Proposal:**\n\n---\n\n**Title:** Search engine for internal knowledge base\n\n**Description:** Build Python semantic search with embeddings, retrieval evaluation and citation-backed answers using FastAPI.",
+          "done_reason": "length",
+          "tokens": 180,
+          "prompt_tokens": 354,
+          "tokens_per_second": 180.15096650993533
+        },
+        {
+          "latency_s": 3.80045809999865,
+          "removed_claims": 0,
+          "before_chars": 836,
+          "after_chars": 829,
+          "job_id": "j106",
+          "raw": "**Data Analyst Proposal**\n\n**Job Title:** Data Analyst\n\n**Job Description:** Build repeatable SQL and Python reporting scripts with clear charts. Must show previous analytics delivery.\n\n**Skills:** \n- SQL\n- Python\n- Visualization\n\n**Experience:** \n- [e1]: Weekly reporting\n  - Client verified accurate SQL reports and clear visualization delivered every week.\n  - Outcome: Positive review\n\n- [e2]: Operations BI\n  - Transformed messy CSV files using Python and SQL and delivered Power BI KPI dashboards to operations stakeholders.\n  - Outcome: Delivered\n\n**Portfolio Evidence:**\n- [e5]: Weekly reporting\n  - Client verified accurate SQL reports and clear visualization delivered every week.\n  - Outcome: Positive review\n\n- [e4]: Operations BI\n  - Transformed messy CSV files using Python and SQL and delivered Power BI KPI dashboards to",
+          "cleaned": "**Data Analyst Proposal**\n\n**Job Title:** Data Analyst\n\n**Job Description:** Build repeatable SQL and Python reporting scripts with clear charts. Must show previous analytics delivery. **Skills:** \n- SQL\n- Python\n- Visualization\n\n**Experience:** \n- [e1]: Weekly reporting\n  - Client verified accurate SQL reports and clear visualization delivered every week. - Outcome: Positive review\n\n- [e2]: Operations BI\n  - Transformed messy CSV files using Python and SQL and delivered Power BI KPI dashboards to operations stakeholders. - Outcome: Delivered\n\n**Portfolio Evidence:**\n- [e5]: Weekly reporting\n  - Client verified accurate SQL reports and clear visualization delivered every week. - Outcome: Positive review\n\n- [e4]: Operations BI\n  - Transformed messy CSV files using Python and SQL and delivered Power BI KPI dashboards to",
+          "done_reason": "length",
+          "tokens": 180,
+          "prompt_tokens": 327,
+          "tokens_per_second": 170.3662970033515
+        }
+      ]
+    },
+    "qwen3:0.6b": {
+      "samples": 5,
+      "p50_latency_s": 3.394,
+      "p95_latency_s": 6.932,
+      "verifier_rejections_per_proposal": 0.6,
+      "characters_retained_ratio": 0.713,
+      "api_cost_usd": 0,
+      "model_provider": "local Ollama; hardware cost not included",
+      "generated_tokens": 213,
+      "rows": [
+        {
+          "latency_s": 7.762464899999031,
+          "removed_claims": 2,
+          "before_chars": 253,
+          "after_chars": 0,
+          "job_id": "j100",
+          "raw": "- Built a Python scikit-learn logistic regression and random forest for churn classification, evaluated using ROC AUC and class imbalance metrics.  \n- Implemented an embedding-based retrieval system in a Python FastAPI service, evaluated using Recall@5.",
+          "cleaned": "",
+          "done_reason": "stop",
+          "tokens": 49,
+          "prompt_tokens": 365,
+          "tokens_per_second": 116.7923574894887
+        },
+        {
+          "latency_s": 3.3940178000011656,
+          "removed_claims": 0,
+          "before_chars": 119,
+          "after_chars": 119,
+          "job_id": "j101",
+          "raw": "[ e3 ] Built responsive React TypeScript dashboards integrated with FastAPI, with keyboard-accessible forms and charts.",
+          "cleaned": "[ e3 ] Built responsive React TypeScript dashboards integrated with FastAPI, with keyboard-accessible forms and charts.",
+          "done_reason": "stop",
+          "tokens": 24,
+          "prompt_tokens": 342,
+          "tokens_per_second": 99.61151509114453
+        },
+        {
+          "latency_s": 3.364899999996851,
+          "removed_claims": 1,
+          "before_chars": 248,
+          "after_chars": 142,
+          "job_id": "j103",
+          "raw": "- [e4] I have successfully transformed messy CSV files using Python and SQL, and delivered Power BI KPI dashboards to operations stakeholders.  \n- [e5] I have delivered accurate SQL reports and clear visualization every week, with positive reviews.",
+          "cleaned": "- [e4] I have successfully transformed messy CSV files using Python and SQL, and delivered Power BI KPI dashboards to operations stakeholders.",
+          "done_reason": "stop",
+          "tokens": 52,
+          "prompt_tokens": 337,
+          "tokens_per_second": 112.3794622210504
+        },
+        {
+          "latency_s": 3.3530303000006825,
+          "removed_claims": 0,
+          "before_chars": 171,
+          "after_chars": 171,
+          "job_id": "j105",
+          "raw": "[ e2 ] \"Semantic document search\"  \n\"Implemented embedding-based retrieval and evidence citations in a Python FastAPI service, evaluated retrieval Recall@5.\"  \n\"delivered\"",
+          "cleaned": "[ e2 ] \"Semantic document search\"  \n\"Implemented embedding-based retrieval and evidence citations in a Python FastAPI service, evaluated retrieval Recall@5.\"  \n\"delivered\"",
+          "done_reason": "stop",
+          "tokens": 37,
+          "prompt_tokens": 362,
+          "tokens_per_second": 122.21668026464867
+        },
+        {
+          "latency_s": 3.61252610000156,
+          "removed_claims": 0,
+          "before_chars": 246,
+          "after_chars": 244,
+          "job_id": "j106",
+          "raw": "- [e5] Weekly reporting: Client verified accurate SQL reports and clear visualization delivered every week.  \n- [e4] Operations BI: Transformed messy CSV files using Python and SQL and delivered Power BI KPI dashboards to operations stakeholders.",
+          "cleaned": "- [e5] Weekly reporting: Client verified accurate SQL reports and clear visualization delivered every week. - [e4] Operations BI: Transformed messy CSV files using Python and SQL and delivered Power BI KPI dashboards to operations stakeholders.",
+          "done_reason": "stop",
+          "tokens": 51,
+          "prompt_tokens": 335,
+          "tokens_per_second": 103.01948078181687
+        }
+      ]
+    }
+  }
+}

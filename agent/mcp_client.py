@@ -7,6 +7,9 @@ short-lived session for reliability on Windows and Linux.
 from __future__ import annotations
 import asyncio,json,os,sys
 from pathlib import Path
+from agent.paths import marketplace_path
+from agent.tracing import trace_id,event
+import time
 
 ROOT=Path(__file__).resolve().parents[1]
 
@@ -25,7 +28,7 @@ class MCPUnavailable(RuntimeError):pass
 class MCPPermissionDenied(PermissionError):pass
 
 class MCPRouter:
-    def __init__(self,timeout:float=25):self.timeout=timeout
+    def __init__(self,timeout:float=25):self.timeout=float(os.getenv('GIGBID_MCP_TIMEOUT',str(timeout)))
 
     async def acall(self,role:str,server:str,name:str,arguments:dict|None=None):
         if name not in ALLOWLIST.get(role,{}).get(server,set()):
@@ -35,14 +38,17 @@ class MCPRouter:
         if server not in ('marketplace','portfolio','workspace'):raise MCPPermissionDenied('Unknown MCP server')
         params=StdioServerParameters(command=sys.executable,
                args=['-m',f'mcp_servers.{server}.server'],
-               env={**os.environ,'GIGBID_DB_PATH':str(ROOT/'gigbid.sqlite'),
+               env={**os.environ,'GIGBID_DB_PATH':marketplace_path(),'GIGBID_TRACE_ID':trace_id.get(),
                     'PYTHONPATH':str(ROOT)+os.pathsep+os.environ.get('PYTHONPATH','')})
         try:
+            started=time.perf_counter()
+            event('mcp_call',role=role,server=server,tool=name,arguments=arguments or {})
             async def execute():
                 async with stdio_client(params) as (read,write):
                     async with ClientSession(read,write) as session:
                         await session.initialize()
                         result=await session.call_tool(name,arguments or {})
+                        event('mcp_result',server=server,tool=name,is_error=result.isError,latency_ms=(time.perf_counter()-started)*1000)
                         if result.isError:raise MCPUnavailable(f'{server}.{name} failed: {result.content}')
                         structured=result.structuredContent
                         if isinstance(structured,dict):

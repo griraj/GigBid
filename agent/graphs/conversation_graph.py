@@ -14,16 +14,35 @@ class ConversationState(TypedDict,total=False):
     status:str
     approval:dict
     result:dict
+    negotiation:dict
+    slots:list[str]
 
 def build_conversation_graph(marketplace,checkpointer):
     router=MCPRouter()
     def liaison(s):
         content=s['incoming'];intent='scam' if FORBIDDEN.search(content) or INJECTION.search(content) else 'interview' if 'interview' in content.lower() else 'negotiation' if 'budget' in content.lower() or 'rate' in content.lower() else 'question'
         reply='Thank you for reaching out. I would be happy to discuss milestones and requirements here on the platform.' if intent!='scam' else ''
-        return {'intent':intent,'suggestion':reply,'status':'blocked' if intent=='scam' else 'awaiting_approval'}
+        negotiation={}
+        slots=[]
+        if intent=='interview':
+            from datetime import datetime
+            slots=router.call('liaison','workspace','free_calendar_slots',{'days':7})
+            readable=[datetime.fromisoformat(slot).strftime('%a %d %b, %H:%M UTC') for slot in slots[:3]]
+            reply='Available simulated interview slots (UTC): '+', '.join(readable)+'. Which would suit you? I would confirm the appointment here on the platform.'
+        if intent=='negotiation':
+            import yaml
+            from agent.paths import ROOT
+            from agent.graphs.negotiation_graph import build_negotiation_graph
+            config=yaml.safe_load((ROOT/'agent/config.yaml').read_text())
+            negotiation=build_negotiation_graph().invoke({'incoming':content,'floor':float(config['hourly_floor'])})
+            reply=negotiation['suggestion']
+        return {'intent':intent,'suggestion':reply,'slots':slots,'negotiation':negotiation,'status':'blocked' if intent=='scam' else 'awaiting_approval'}
     def route(s):return END if s['status']=='blocked' else 'approval'
     def approval(s):
-        choice=interrupt({'intent':s['intent'],'draft':s['suggestion'],'job_id':s['job_id']})
+        if os.getenv('GIGBID_TOOL_BACKEND','mcp')=='mcp':
+            preview=router.call('liaison','marketplace','send_message',{'job_id':s['job_id'],'body':s['suggestion'],'idempotency_key':'message-preview','dry_run':True})
+        else:preview=marketplace.send_message(s['job_id'],s['suggestion'],'message-preview',dry_run=True)
+        choice=interrupt({'intent':s['intent'],'draft':s['suggestion'],'job_id':s['job_id'],'slots':s.get('slots',[]),'preview':preview})
         if choice.get('action')!='approve':return {'status':'rejected','approval':choice}
         body=choice.get('text',s['suggestion'])
         if FORBIDDEN.search(body) or CONTACT.search(body):return {'status':'blocked'}

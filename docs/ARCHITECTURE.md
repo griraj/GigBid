@@ -4,4 +4,6 @@ The bid graph analyzes a job through three independently scheduled StateGraph br
 
 The retrieval algorithm is independently authored and explicitly lexical. BM25 and TF-IDF reciprocal rank fusion can be run offline; they are not a learned embedding or a cross-encoder. The default architecture is a development foundation and does not misrepresent those methods as implemented.
 
+The opt-in neural mode now uses real open SentenceTransformer vectors and a persistent Chroma index, with an open cross-encoder in V3. V8 runs as a bounded corrective LangGraph. The official MCP ClientSession transport is used by the main graphs, with name-based allowlists; read and approved-write schema annotations are contract tested. The SQLite memory store promotes only repeated approved style edits or independently verified marketplace outcomes. A Postgres checkpointer is optionally configured for durable graph threads.
+
 Known failure: bid drafts may be too generic without a local LLM; injection detection is heuristic. The human approval and unsupported-claim dropping mechanisms limit their impact, but do not guarantee safety.

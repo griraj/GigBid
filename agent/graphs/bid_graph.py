@@ -2,10 +2,12 @@
 from __future__ import annotations
 from typing import TypedDict
 from langgraph.graph import StateGraph,START,END
-from langgraph.types import interrupt
+from langgraph.types import interrupt,Send
 from agent.schemas import JobSpec,RiskReport,FitReport,BidDecision,PriceQuote,ProposalDraft,Critique,ComplianceVerdict
 from rag.verify import verify
 import re
+import os
+from agent.mcp_client import MCPRouter
 
 INJECTION=re.compile(r'(ignore (?:all|any|previous)|system\s*:|developer\s*:|override (?:safety|instructions))',re.I)
 FORBIDDEN=re.compile(r'(telegram|whatsapp|off.platform|outside (?:the )?platform|deposit|passport|credit card|free (?:production|sample)|unpaid (?:trial|sample))',re.I)
@@ -29,11 +31,25 @@ class BidState(TypedDict,total=False):
     status:str
 
 def build_bid_graph(marketplace,index,config,checkpointer):
+    tool_router=MCPRouter()
+    def marketplace_read(role,name,args):
+        if os.getenv('GIGBID_TOOL_BACKEND','mcp')=='mcp':
+            return tool_router.call(role,'marketplace',name,args)
+        return getattr(marketplace,name)(**args)
+    def evidence_search(requirement,persona):
+        if os.getenv('GIGBID_TOOL_BACKEND','mcp')=='mcp':
+            return tool_router.call('fit','portfolio','search_evidence',{'requirement':requirement,'persona':persona,'k':5})
+        return index.search(requirement,k=5,variant=config.get('rag_variant','v2'),persona=persona)
+    def marketplace_write(name,job_id,text,key,dry_run):
+        if os.getenv('GIGBID_TOOL_BACKEND','mcp')=='mcp':
+            field='text' if name!='send_message' else 'body'
+            return tool_router.call('approval','marketplace',name,{'job_id':job_id,field:text,'idempotency_key':key,'dry_run':dry_run})
+        return getattr(marketplace,name)(job_id,text,key,dry_run=dry_run)
     def analyst(s):
         j=s['job']; spec=JobSpec(job_id=j['id'],title=j['title'],requirements=j['skills'],deliverables=[j['title']],budget_min=j['min_budget'],budget_max=j['max_budget'])
         return {'spec':spec.model_dump()}
     def risk(s):
-        j=s['job'];c=marketplace.get_client_history(j['client_id']); flags=[]
+        j=s['job'];c=marketplace_read('risk','get_client_history',{'client_id':j['client_id']}); flags=[]
         if not c.get('payment_verified'):flags.append('unverified_payment')
         if FORBIDDEN.search(j['description']):flags.append('free_work_or_off_platform')
         if INJECTION.search(j['description']): flags.append('prompt_injection')
@@ -42,7 +58,7 @@ def build_bid_graph(marketplace,index,config,checkpointer):
     def fit(s):
         j=s['job']; found={}; evidence={}
         for req in j['skills']:
-            hits=[e for e in index.search(req,k=3,variant=config.get('rag_variant','v2'),persona=s['persona'])
+            hits=[e for e in evidence_search(req,s['persona'])
                   if req.lower() in [v.lower() for v in e['skills']] or
                   (e.get('type')=='portfolio_document' and req.lower() in e['text'].lower())]
             found[req]=[e['id'] for e in hits]
@@ -59,8 +75,9 @@ def build_bid_graph(marketplace,index,config,checkpointer):
     def decision_route(s):return 'price' if s['decision']['action']=='bid' else END
     def price(s):
         j=s['job'];floor=config.get('hourly_floor',22)*max(1,min(20,len(j['skills'])*3))
+        connects_available=marketplace_read('pricing','get_connects_balance',{})
         suggested=max(j['min_budget'],min(j['max_budget'],round((j['min_budget']+j['max_budget'])/2)))
-        return {'price':PriceQuote(amount=suggested,connects=j['connects'],rationale=f'Midpoint of stated budget; floor estimate ${floor:.0f}, no guarantee of profit.').model_dump()}
+        return {'price':PriceQuote(amount=suggested,connects=j['connects'],rationale=f'Midpoint of stated budget; floor estimate ${floor:.0f}; marketplace balance {connects_available}, no guarantee of profit.').model_dump()}
     def write(s):
         j=s['job'];ev=s.get('evidence',[])
         lines=[f"Hello, I can help with {j['title'].lower()}."]
@@ -100,7 +117,7 @@ def build_bid_graph(marketplace,index,config,checkpointer):
         return {'compliance':ComplianceVerdict(allowed=not reasons,reasons=reasons).model_dump(),'status':'awaiting_approval' if not reasons else 'blocked'}
     def guard_route(s):return 'approval' if s['compliance']['allowed'] else END
     def approval(s):
-        preview=marketplace.submit_proposal(s['job']['id'],s['draft']['text'],'preview-only',dry_run=True)
+        preview=marketplace_write('submit_proposal',s['job']['id'],s['draft']['text'],'preview-only',True)
         choice=interrupt({'job_id':s['job']['id'],'draft':s['draft'],'evidence':s['evidence'],'risk':s['risk'],'price':s['price'],'preview':preview})
         if not isinstance(choice,dict) or choice.get('action')!='approve':return {'approval':choice or {'action':'reject'},'status':'rejected'}
         text=choice.get('text',s['draft']['text'])
@@ -111,11 +128,12 @@ def build_bid_graph(marketplace,index,config,checkpointer):
     def submit(s):
         from uuid import uuid5,NAMESPACE_URL
         key=str(uuid5(NAMESPACE_URL,'bid:'+s['job']['id']+':'+s['persona']))
-        result=marketplace.submit_proposal(s['job']['id'],s['approval']['text'],key)
+        result=marketplace_write('submit_proposal',s['job']['id'],s['approval']['text'],key,False)
         return {'result':result,'status':'submitted'}
     graph=StateGraph(BidState)
     for name,fn in [('analyst',analyst),('risk',risk),('fit',fit),('decide',decide),('price',price),('writer',write),('critic',critic),('revise',revise),('compliance',compliance),('approval',approval),('submit',submit)]:graph.add_node(name,fn)
-    for node in ['analyst','risk','fit']:graph.add_edge(START,node);graph.add_edge(node,'decide')
+    graph.add_conditional_edges(START,lambda s:[Send(name,s) for name in ('analyst','risk','fit')],['analyst','risk','fit'])
+    for node in ['analyst','risk','fit']:graph.add_edge(node,'decide')
     graph.add_conditional_edges('decide',decision_route)
     graph.add_edge('price','writer');graph.add_edge('writer','critic')
     graph.add_conditional_edges('critic',critic_route,{'revise':'revise','compliance':'compliance'})

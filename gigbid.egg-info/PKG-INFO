@@ -17,3 +17,7 @@ Requires-Dist: psycopg[binary]<4,>=3
 Requires-Dist: redis<7,>=5
 Provides-Extra: test
 Requires-Dist: pytest<10,>=8; extra == "test"
+Provides-Extra: neural
+Requires-Dist: sentence-transformers<6,>=3; extra == "neural"
+Requires-Dist: chromadb<2,>=1; extra == "neural"
+Requires-Dist: pypdf<7,>=5; extra == "neural"

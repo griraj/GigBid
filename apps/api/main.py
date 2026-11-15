@@ -18,6 +18,7 @@ from agent.graphs.conversation_graph import build_conversation_graph
 from data.synthetic import EVIDENCE
 from rag.ingest_portfolio import load_portfolio
 from rag.retriever import EvidenceIndex
+from agent.memory.store import MemoryStore
 import json
 
 ROOT=Path(__file__).resolve().parents[2]
@@ -30,14 +31,21 @@ if os.getenv('GIGBID_RAG_BACKEND','lexical')=='neural':
           model_name=os.getenv('GIGBID_EMBEDDING_MODEL','sentence-transformers/all-MiniLM-L6-v2'),
           directory=str(ROOT/'data/processed/chroma'))
 else:index=EvidenceIndex(portfolio_items)
-try:
-    from langgraph.checkpoint.sqlite import SqliteSaver
-    db=sqlite3.connect(str(ROOT/'checkpoints.sqlite'),check_same_thread=False)
-    checkpointer=SqliteSaver(db)
-except ImportError:
-    checkpointer=MemorySaver()  # degraded: approval is not restart-durable
+if os.getenv('GIGBID_CHECKPOINT_DATABASE_URL'):
+    from langgraph.checkpoint.postgres import PostgresSaver
+    _pg_context=PostgresSaver.from_conn_string(os.environ['GIGBID_CHECKPOINT_DATABASE_URL'])
+    checkpointer=_pg_context.__enter__()
+    checkpointer.setup()
+else:
+    try:
+        from langgraph.checkpoint.sqlite import SqliteSaver
+        db=sqlite3.connect(str(ROOT/'checkpoints.sqlite'),check_same_thread=False)
+        checkpointer=SqliteSaver(db)
+    except ImportError:
+        checkpointer=MemorySaver()  # degraded: approval is not restart-durable
 bid_graph=build_bid_graph(marketplace,index,CONFIG,checkpointer)
 conversation_graph=build_conversation_graph(marketplace,checkpointer)
+memory=MemoryStore(ROOT/'memory.sqlite')
 jobs_lock=threading.Lock()
 run_personas={}
 
@@ -62,7 +70,7 @@ class MessageRequest(BaseModel):
     incoming:str=Field(min_length=1,max_length=5000)
 
 @app.get('/health')
-def health():return {'status':'ok','mode':os.getenv('GIGBID_MODE','local'),'rag_backend':os.getenv('GIGBID_RAG_BACKEND','lexical'),'durable':type(checkpointer).__name__=='SqliteSaver'}
+def health():return {'status':'ok','mode':os.getenv('GIGBID_MODE','local'),'rag_backend':os.getenv('GIGBID_RAG_BACKEND','lexical'),'tool_backend':os.getenv('GIGBID_TOOL_BACKEND','mcp'),'durable':type(checkpointer).__name__ in ('SqliteSaver','PostgresSaver')}
 
 @app.get('/jobs')
 def jobs(authorization:str|None=Header(None)):
@@ -105,10 +113,24 @@ def run_state(thread_id:str,authorization:str|None=Header(None)):
 @app.post('/runs/{thread_id}/approval')
 def approve_run(thread_id:str,req:ApprovalRequest,authorization:str|None=Header(None)):
     guard(authorization)
-    if not get_run_state(thread_id)['pending_approval']:raise HTTPException(409,'No pending approval')
+    pending=get_run_state(thread_id)
+    if not pending['pending_approval']:raise HTTPException(409,'No pending approval')
     choice=req.model_dump(exclude_none=True)
     with jobs_lock:bid_graph.invoke(Command(resume=choice),config={'configurable':{'thread_id':thread_id}})
-    return {'thread_id':thread_id,**get_run_state(thread_id)}
+    finished=get_run_state(thread_id)
+    if finished['status']=='submitted' and req.action=='approve' and req.text and req.text!=pending.get('draft',{}).get('text'):
+        memory.record_approved_edit('reviewer',pending['draft']['text'],req.text)
+    return {'thread_id':thread_id,**finished}
+
+@app.get('/memory')
+def get_memory(authorization:str|None=Header(None)):
+    guard(authorization);return memory.list('reviewer')
+
+@app.delete('/memory/{memory_id}')
+def delete_memory(memory_id:int,authorization:str|None=Header(None)):
+    guard(authorization)
+    if not memory.delete('reviewer',memory_id):raise HTTPException(404,'Memory not found')
+    return {'deleted':True}
 
 @app.get('/runs/{thread_id}/events')
 def run_events(thread_id:str,authorization:str|None=Header(None)):

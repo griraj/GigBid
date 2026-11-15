@@ -39,6 +39,9 @@ class EvidenceIndex:
         return np.array(scores)
 
     def search(self, query, k=5, variant='v2', requirements=None, persona=None):
+        if variant=='v8':
+            from rag.corrective_graph import run_corrective
+            return run_corrective(self,query,requirements,persona,k)
         allowed=np.array([persona is None or x['persona']==persona for x in self.items])
         dense=self._dense(query)
         if variant == 'v0': scores=dense
@@ -57,10 +60,6 @@ class EvidenceIndex:
                 scores+=np.array([len(query_set & set(t))/max(1,len(query_set))*0.025 for t in self.tokens])
             if variant=='v4':
                 scores+=np.array([0.015 if x['outcome'] in ('won','positive_review') else 0 for x in self.items])
-            if variant=='v8':
-                initial=np.where(allowed)[0][np.argsort(-scores[allowed])[:k]]
-                if len(initial)==0 or max(scores[initial],default=0)<0.01:
-                    return self.search(' '.join(requirements or [query]),k,'v1',requirements,persona)
         scores=np.where(allowed,scores,-float('inf'))
         indices=np.argsort(-scores)[:k]
         return [{**self.items[i], 'retrieval_score':float(scores[i])} for i in indices if np.isfinite(scores[i]) and scores[i]>0]

@@ -11,5 +11,10 @@ pyyaml<7,>=6
 psycopg[binary]<4,>=3
 redis<7,>=5
 
+[neural]
+sentence-transformers<6,>=3
+chromadb<2,>=1
+pypdf<7,>=5
+
 [test]
 pytest<10,>=8

@@ -7,6 +7,15 @@ import time
 from pathlib import Path
 from data.synthetic import JOBS, CLIENTS
 from data.ingest import load_jobs
+import re
+
+def mask_pii(obj):
+    """Redact contact and payment markers in audit copies, not submitted text."""
+    encoded=json.dumps(obj)
+    encoded=re.sub(r'[\w.%-]+@[\w.-]+\.[a-zA-Z]{2,}','[EMAIL_REDACTED]',encoded)
+    encoded=re.sub(r'(?<!\d)(?:\+?\d[\d ()-]{8,}\d)(?!\d)','[PHONE_REDACTED]',encoded)
+    encoded=re.sub(r'\b\d{13,19}\b','[PAYMENT_NUMBER_REDACTED]',encoded)
+    return encoded
 
 class MarketplaceUnavailable(RuntimeError): pass
 
@@ -53,7 +62,7 @@ class LocalMarketplace:
             with self.db:
                 if kind=='send_message': self.db.execute('insert into messages(job_id,sender,body,created) values(?,?,?,?)',(payload['job_id'],'freelancer',payload['body'],time.time()))
                 self.db.execute('insert into writes values(?,?,?,?)',(key,kind,json.dumps(result),time.time()))
-                self.db.execute('insert into audit(actor,tool,args,result,trace_id,at) values(?,?,?,?,?,?)',(actor,kind,json.dumps(payload),json.dumps(result),trace_id,time.time()))
+                self.db.execute('insert into audit(actor,tool,args,result,trace_id,at) values(?,?,?,?,?,?)',(actor,kind,mask_pii(payload),mask_pii(result),trace_id,time.time()))
             return result
 
     def create_proposal_draft(self,job_id,text,key,dry_run=False,**meta): return self._write('create_proposal_draft',{'job_id':job_id,'text':text},key,dry_run,**meta)

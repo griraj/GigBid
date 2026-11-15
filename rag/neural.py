@@ -47,6 +47,9 @@ class NeuralEvidenceIndex:
 
     def search(self,query,k=5,variant='v2',requirements=None,persona=None):
         from rag.retriever import EvidenceIndex
+        if variant=='v8':
+            from rag.corrective_graph import run_corrective
+            return run_corrective(self,query,requirements,persona,k)
         if not self.items:return []
         # Candidate recall uses true neural cosine on normalized vectors.
         vectors=np.asarray(self.embedder.encode([query],normalize_embeddings=True,convert_to_numpy=True))
@@ -81,6 +84,4 @@ class NeuralEvidenceIndex:
             scores=self.reranker.predict([(query,self.items[id]['text']) for id in rerank_ids])
             ids=sorted(zip(rerank_ids,scores),key=lambda pair:float(pair[1]),reverse=True)
             ids=[id for id,_ in ids]+ids[len(rerank_ids):]
-        if variant=='v8' and (not ids or max(neural.values(),default=-1)<0.15):
-            return self.search(' '.join(requirements or [query]),k,'v1',requirements,persona)
         return [{**self.items[id],'retrieval_score':float(combined[id])} for id in ids[:k]]

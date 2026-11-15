@@ -17,4 +17,4 @@
 | Workspace | create_interview_hold | write local | no external invitations |
 | Workspace | create_email_draft | write local | never sends |
 
-Portfolio resources: `portfolio://case/{id}`, `portfolio://proposal/{id}`. Prompt: `answer_screening_question`. Current servers expose stdio transport and do **not** yet implement HTTP bearer authentication, third-party MCP trust integration, or formal annotation/schema snapshots. Upwork should only be trusted after user-authorized OAuth via the official endpoint; GitHub MCP should be authorized read-only with a limited scope.
+Portfolio resources: `portfolio://case/{id}`, `portfolio://proposal/{id}`. Prompt: `answer_screening_question`. The bid and conversation graphs now use a role-filtered MCP ClientSession over stdio by default. A contract test checks annotations and write schema parameters. Current servers still **do not** implement HTTP bearer authentication or production per-user rate limits. Upwork live access requires official OAuth and approval of the hosting client. GitHub's third-party official MCP server is configurable with a separately authorized read-only token but not connected by default.

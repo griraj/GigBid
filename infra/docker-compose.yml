@@ -1,0 +1,22 @@
+services:
+  api:
+    build:
+      context: ..
+      dockerfile: infra/docker/Dockerfile.api
+    environment:
+      GIGBID_MODE: local
+      GIGBID_API_TOKEN: ${GIGBID_API_TOKEN:-demo-reviewer-token}
+    volumes:
+      - local_data:/app/local_data
+    ports:
+      - '8000:8000'
+  web:
+    build:
+      context: ..
+      dockerfile: infra/docker/Dockerfile.web
+    ports:
+      - '5173:80'
+    depends_on:
+      - api
+volumes:
+  local_data:

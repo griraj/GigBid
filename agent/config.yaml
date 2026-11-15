@@ -1,0 +1,19 @@
+marketplace: local
+rag_variant: v2
+weekly_connects: 65
+minimum_fit: 0.30
+hourly_floor: 22
+max_critic_revisions: 2
+max_steps: 18
+max_tokens: 12000
+models:
+  open:
+    router: qwen3:4b
+    writer: qwen3:4b
+    critic: qwen3:4b
+    embedding: tfidf-cpu-fallback
+  paid:
+    router: qwen3:4b
+    writer: qwen3:4b
+    critic: qwen3:4b
+    embedding: tfidf-cpu-fallback

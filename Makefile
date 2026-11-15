@@ -1,4 +1,7 @@
-.PHONY: dev test eval seed lint demo
+.PHONY: dev test eval seed lint demo api-client
+api-client:
+	python scripts/export_openapi.py
+	cd apps/web && npm run api:generate
 dev:
 	uvicorn apps.api.main:app --reload --host 0.0.0.0 --port 8000
 test:

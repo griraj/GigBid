@@ -14,6 +14,7 @@ FORBIDDEN=re.compile(r'(telegram|whatsapp|off.platform|outside (?:the )?platform
 CONTACT=re.compile(r'[\w.%-]+@[\w.-]+\.[a-z]{2,}|(?:\+?\d[\d -]{8,}\d)',re.I)
 
 class BidState(TypedDict,total=False):
+    owner_id:str
     job:dict
     persona:str
     spec:dict

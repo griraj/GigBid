@@ -1,4 +1,27 @@
 services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: gigbid
+      POSTGRES_DB: gigbid
+      POSTGRES_PASSWORD: ${GIGBID_POSTGRES_PASSWORD:?Set a private Postgres password}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [CMD-SHELL, 'pg_isready -U gigbid -d gigbid']
+      interval: 5s
+      retries: 10
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: [redis-server, --appendonly, 'yes']
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: [CMD, redis-cli, ping]
+      interval: 5s
+      retries: 10
   api:
     restart: unless-stopped
     build:
@@ -9,15 +32,46 @@ services:
       GIGBID_ENV: production
       GIGBID_API_TOKEN: ${GIGBID_API_TOKEN:?Set a private reviewer token}
       GIGBID_DATA_DIR: /app/local_data
+      GIGBID_CHECKPOINT_DATABASE_URL: postgresql://gigbid:${GIGBID_POSTGRES_PASSWORD}@postgres:5432/gigbid
+      GIGBID_REDIS_URL: redis://redis:6379/0
+      GIGBID_AUTH_MODE: ${GIGBID_AUTH_MODE:-reviewer}
+      GIGBID_SIGNUP_INVITE: ${GIGBID_SIGNUP_INVITE:-}
     volumes:
       - local_data:/app/local_data
     expose:
       - '8000'
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     healthcheck:
       test: [CMD, python, -c, "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
       interval: 30s
       timeout: 5s
       retries: 3
+  worker:
+    restart: unless-stopped
+    build:
+      context: ..
+      dockerfile: infra/docker/Dockerfile.api
+    command: [arq, worker.jobs.WorkerSettings]
+    environment:
+      GIGBID_MODE: local
+      GIGBID_ENV: production
+      GIGBID_API_TOKEN: ${GIGBID_API_TOKEN:?Set a private reviewer token}
+      GIGBID_AUTH_MODE: ${GIGBID_AUTH_MODE:-reviewer}
+      GIGBID_SIGNUP_INVITE: ${GIGBID_SIGNUP_INVITE:-}
+      GIGBID_DATA_DIR: /app/local_data
+      GIGBID_CHECKPOINT_DATABASE_URL: postgresql://gigbid:${GIGBID_POSTGRES_PASSWORD}@postgres:5432/gigbid
+      GIGBID_REDIS_URL: redis://redis:6379/0
+    volumes:
+      - local_data:/app/local_data
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
   web:
     restart: unless-stopped
     build:
@@ -30,3 +84,5 @@ services:
         condition: service_healthy
 volumes:
   local_data:
+  postgres_data:
+  redis_data:

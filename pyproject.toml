@@ -3,7 +3,7 @@ name = "gigbid"
 version = "0.1.0"
 description = "Evidence-first freelancer copilot"
 requires-python = ">=3.11"
-dependencies = ["fastapi>=0.115,<1", "uvicorn>=0.30,<1", "pydantic>=2,<3", "langgraph>=0.6,<2", "mcp>=1,<2", "langchain-mcp-adapters>=0.1,<1", "httpx>=0.27,<1", "numpy>=1.26,<3", "scikit-learn>=1.5,<2", "pyyaml>=6,<7", "psycopg[binary]>=3,<4", "redis>=5,<7"]
+dependencies = ["fastapi>=0.115,<1", "uvicorn>=0.30,<1", "pydantic>=2,<3", "langgraph>=0.6,<2", "mcp>=1,<2", "langchain-mcp-adapters>=0.1,<1", "httpx>=0.27,<1", "numpy>=1.26,<3", "scikit-learn>=1.5,<2", "pyyaml>=6,<7", "psycopg[binary]>=3,<4", "redis>=5,<7", "cryptography>=43,<51", "pypdf>=5,<8"]
 
 [project.optional-dependencies]
 test = ["pytest>=8,<10"]
@@ -11,6 +11,7 @@ report = ["reportlab>=4,<6", "pymupdf>=1.24,<3", "pillow>=10,<14"]
 neural = ["sentence-transformers>=3,<6", "chromadb>=1,<2", "pypdf>=5,<7"]
 neural-lite = ["sqlite-vec>=0.1.6,<1", "pypdf>=5,<8"]
 postgres = ["langgraph-checkpoint-postgres>=2,<4", "psycopg-pool>=3,<4"]
+worker = ["arq>=0.26,<1"]
 
 [tool.pytest.ini_options]
 pythonpath = ["."]
@@ -22,5 +23,5 @@ build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["agent*", "apps*", "data*", "evals*", "mcp_servers*", "rag*"]
+include = ["agent*", "apps*", "data*", "evals*", "mcp_servers*", "rag*", "worker*"]
 exclude = ["tests*", "infra*", "docs*"]

@@ -6,7 +6,8 @@ COPY apps ./apps
 COPY data ./data
 COPY rag ./rag
 COPY mcp_servers ./mcp_servers
-RUN pip install --no-cache-dir . langgraph-checkpoint-sqlite
+COPY worker ./worker
+RUN pip install --no-cache-dir '.[worker,postgres]' langgraph-checkpoint-sqlite
 RUN useradd --create-home gigbid && mkdir -p /app/local_data && chown -R gigbid:gigbid /app
 ENV GIGBID_DATA_DIR=/app/local_data
 USER gigbid

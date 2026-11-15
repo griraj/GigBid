@@ -42,7 +42,9 @@ def build_bid_graph(marketplace,index,config,checkpointer):
     def fit(s):
         j=s['job']; found={}; evidence={}
         for req in j['skills']:
-            hits=[e for e in index.search(req,k=3,variant=config.get('rag_variant','v2'),persona=s['persona']) if req.lower() in [v.lower() for v in e['skills']]]
+            hits=[e for e in index.search(req,k=3,variant=config.get('rag_variant','v2'),persona=s['persona'])
+                  if req.lower() in [v.lower() for v in e['skills']] or
+                  (e.get('type')=='portfolio_document' and req.lower() in e['text'].lower())]
             found[req]=[e['id'] for e in hits]
             for e in hits:evidence[e['id']]=e
         missing=[r for r,ids in found.items() if not ids]
@@ -50,7 +52,9 @@ def build_bid_graph(marketplace,index,config,checkpointer):
         return {'fit':FitReport(score=score,matched=found,missing=missing).model_dump(),'evidence':list(evidence.values())}
     def decide(s):
         r=s['risk'];f=s['fit']; action='skip' if r['score']>=0.55 else 'bid' if f['score']>=config.get('minimum_fit',0.3) else 'watch'
+        if s['job'].get('provenance',{}).get('kind')=='real_export' and action=='bid':action='watch'
         reason='High risk' if action=='skip' else 'Portfolio evidence supports requirements' if action=='bid' else 'Insufficient demonstrated fit'
+        if s['job'].get('provenance',{}).get('kind')=='real_export':reason='Research-only imported job: analysis is allowed, but submission is disabled in local mode.'
         return {'decision':BidDecision(action=action,rationale=reason).model_dump(),'status':action}
     def decision_route(s):return 'price' if s['decision']['action']=='bid' else END
     def price(s):
@@ -62,10 +66,19 @@ def build_bid_graph(marketplace,index,config,checkpointer):
         lines=[f"Hello, I can help with {j['title'].lower()}."]
         mapping={}
         for e in ev[:3]:
-            sentence=f"I delivered {e['title'].lower()} using {', '.join(e['skills'][:3])} [{e['id']}]."
+            if e.get('outcome')=='unverified':
+                sentence=f"My uploaded portfolio document discusses {e['title'].lower()} [{e['id']}]."
+            else:
+                sentence=f"I delivered {e['title'].lower()} using {', '.join(e['skills'][:3])} [{e['id']}]."
             lines.append(sentence);mapping[sentence]=[e['id']]
         lines.append('I would confirm deliverables and milestones before starting. Would you be open to discussing the scope?')
-        proposal=ProposalDraft(text=' '.join(lines),claim_evidence=mapping)
+        proposed=' '.join(lines)
+        import os
+        if os.getenv('GIGBID_LLM_BACKEND','template')=='ollama':
+            from agent.llm import draft_with_ollama
+            model=config['models'][os.getenv('GIGBID_MODEL_PROFILE','open')]['writer']
+            proposed=draft_with_ollama(j,ev,model)
+        proposal=ProposalDraft(text=proposed,claim_evidence=mapping)
         verified,rejected=verify(proposal,ev)
         return {'draft':{'text':verified,'claim_evidence':mapping,'removed_claims':rejected}}
     def critic(s):

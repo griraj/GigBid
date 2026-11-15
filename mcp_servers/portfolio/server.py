@@ -2,10 +2,18 @@
 from mcp.server.fastmcp import FastMCP
 from data.synthetic import EVIDENCE
 from rag.retriever import EvidenceIndex
+from rag.ingest_portfolio import load_portfolio
 import json
+import os
+from pathlib import Path
 
 mcp=FastMCP('GigBid Evidence Vault')
-index=EvidenceIndex(EVIDENCE)
+items=EVIDENCE+load_portfolio()
+if os.getenv('GIGBID_RAG_BACKEND','lexical')=='neural':
+    from rag.neural import NeuralEvidenceIndex
+    index=NeuralEvidenceIndex(items,model_name=os.getenv('GIGBID_EMBEDDING_MODEL','sentence-transformers/all-MiniLM-L6-v2'),
+                              directory=str(Path(__file__).resolve().parents[2]/'data/processed/chroma'))
+else:index=EvidenceIndex(items)
 
 @mcp.tool()
 def search_evidence(requirement:str,k:int=5,persona:str='ai',filters:dict|None=None)->list[dict]:
@@ -18,12 +26,12 @@ def search_evidence(requirement:str,k:int=5,persona:str='ai',filters:dict|None=N
 @mcp.tool()
 def get_case_study(id:str)->dict:
     """Retrieve one full case study by its stable evidence ID."""
-    return next((e for e in EVIDENCE if e['id']==id and e['type']=='case_study'),{})
+    return next((e for e in items if e['id']==id and e['type'] in ('case_study','portfolio_document')), {})
 
 @mcp.tool()
 def list_skills(persona:str='ai')->list[str]:
     """List skills demonstrated by this person's evidence."""
-    return sorted(set(skill for e in EVIDENCE if e['persona']==persona for skill in e['skills']))
+    return sorted(set(skill for e in items if e['persona']==persona for skill in e['skills']))
 
 @mcp.resource('portfolio://case/{id}')
 def case_resource(id:str)->str:return json.dumps(get_case_study(id))

@@ -16,13 +16,20 @@ from agent.marketplace_port import build_marketplace,MarketplaceUnavailable
 from agent.graphs.bid_graph import build_bid_graph
 from agent.graphs.conversation_graph import build_conversation_graph
 from data.synthetic import EVIDENCE
+from rag.ingest_portfolio import load_portfolio
 from rag.retriever import EvidenceIndex
 import json
 
 ROOT=Path(__file__).resolve().parents[2]
 CONFIG=yaml.safe_load((ROOT/'agent/config.yaml').read_text())
 marketplace=build_marketplace(os.getenv('GIGBID_MODE','local'),os.getenv('GIGBID_DB_PATH',str(ROOT/'gigbid.sqlite')))
-index=EvidenceIndex(EVIDENCE)
+portfolio_items=EVIDENCE+load_portfolio()
+if os.getenv('GIGBID_RAG_BACKEND','lexical')=='neural':
+    from rag.neural import NeuralEvidenceIndex
+    index=NeuralEvidenceIndex(portfolio_items,
+          model_name=os.getenv('GIGBID_EMBEDDING_MODEL','sentence-transformers/all-MiniLM-L6-v2'),
+          directory=str(ROOT/'data/processed/chroma'))
+else:index=EvidenceIndex(portfolio_items)
 try:
     from langgraph.checkpoint.sqlite import SqliteSaver
     db=sqlite3.connect(str(ROOT/'checkpoints.sqlite'),check_same_thread=False)
@@ -55,7 +62,7 @@ class MessageRequest(BaseModel):
     incoming:str=Field(min_length=1,max_length=5000)
 
 @app.get('/health')
-def health():return {'status':'ok','mode':os.getenv('GIGBID_MODE','local'),'durable':type(checkpointer).__name__=='SqliteSaver'}
+def health():return {'status':'ok','mode':os.getenv('GIGBID_MODE','local'),'rag_backend':os.getenv('GIGBID_RAG_BACKEND','lexical'),'durable':type(checkpointer).__name__=='SqliteSaver'}
 
 @app.get('/jobs')
 def jobs(authorization:str|None=Header(None)):
@@ -71,7 +78,7 @@ def job_detail(job_id:str,authorization:str|None=Header(None)):
 
 @app.get('/portfolio')
 def portfolio(persona:str='ai',authorization:str|None=Header(None)):
-    guard(authorization);return [e for e in EVIDENCE if e['persona']==persona]
+    guard(authorization);return [e for e in portfolio_items if e['persona']==persona]
 
 @app.post('/runs')
 def start_run(req:AnalyzeRequest,authorization:str|None=Header(None)):

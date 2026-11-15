@@ -4,6 +4,8 @@ An original, from-scratch Assignment II implementation with a React/TypeScript i
 
 **Updated interface:** navigation now runs across the top in a sticky horizontal bar. The layout uses the full screen width and includes a **Compact view / Comfortable view** toggle beside the account controls; the selection is remembered on the device. Mobile navigation scrolls horizontally without covering the content.
 
+**Priority 1 update:** authorized CSV ingestion, multi-source deduplication and provenance, PDF/Markdown portfolio ingestion, optional real SentenceTransformer embeddings with Chroma persistence, CPU cross-encoder reranking, configurable Ollama proposal writer, and independent-gold retrieval metrics are now available. These optional neural/model paths require installed weights and have **not** yet been benchmarked on real data. Follow [Priority 1 setup](docs/PRIORITY1_SETUP.md).
+
 > **Submission status: functional development build, not a full rubric-compliant submission.** The supplied archive contains no executable GigSim service or gold-labelled dev set. No Kaggle data, external Upwork account, local LLM, actual neural embeddings, cloud deployment, client hire outcomes or review panel were available during this build. See [requirements gap report](docs/REQUIREMENTS_AND_GAPS.md). Do not submit this as if those items had been completed.
 
 ## Quick start

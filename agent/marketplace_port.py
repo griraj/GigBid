@@ -6,6 +6,7 @@ import threading
 import time
 from pathlib import Path
 from data.synthetic import JOBS, CLIENTS
+from data.ingest import load_jobs
 
 class MarketplaceUnavailable(RuntimeError): pass
 
@@ -20,10 +21,11 @@ class LocalMarketplace:
         self.initial_balance=100
 
     def search_jobs(self, query=''):
-        return [j for j in JOBS if query.lower() in (j['title']+' '+j['description']).lower()]
+        records=JOBS+load_jobs()
+        return [j for j in records if query.lower() in (j['title']+' '+j['description']).lower()]
 
     def get_job(self,id):
-        return next((j for j in JOBS if j['id']==id),None)
+        return next((j for j in self.search_jobs() if j['id']==id),None)
 
     def get_client_history(self,id): return CLIENTS.get(id,{})
     def get_connects_balance(self):
@@ -36,7 +38,11 @@ class LocalMarketplace:
 
     def _write(self,kind,payload,key,dry_run=False,actor='reviewer',trace_id=''):
         if not key or len(key)<8: raise ValueError('idempotency_key must contain at least 8 characters')
-        preview={'kind':kind,'payload':payload,'connects_cost':self.get_job(payload['job_id'])['connects'] if kind=='submit_proposal' else 0,'dry_run':dry_run}
+        job=self.get_job(payload['job_id'])
+        if job is None:raise ValueError('Unknown job')
+        if job.get('provenance',{}).get('kind')=='real_export':
+            raise ValueError('Imported job is research-only; cannot submit to external marketplaces in local mode')
+        preview={'kind':kind,'payload':payload,'connects_cost':job['connects'] if kind=='submit_proposal' else 0,'dry_run':dry_run}
         if dry_run: return preview
         with self.lock:
             row=self.db.execute('select result from writes where key=?',(key,)).fetchone()

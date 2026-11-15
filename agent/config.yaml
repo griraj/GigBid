@@ -1,5 +1,6 @@
 marketplace: local
 rag_variant: v2
+rag_backend: lexical # set GIGBID_RAG_BACKEND=neural after installing optional dependencies
 weekly_connects: 65
 minimum_fit: 0.30
 hourly_floor: 22
